@@ -107,6 +107,18 @@ Aqui está uma descrição de todas as opções de configuração disponíveis e
 
 ---
 
+**Canhoto do Transportador**
+
+- **Tipo**: `bool`
+- **Descrição**: Quando definido como `True`, imprime um canhoto extra (canhoto de coleta) para o transportador assinar ao coletar a mercadoria, além do canhoto de entrega. O canhoto extra só é impresso quando a NF-e possui transportadora (`transporta`) informada. O canhoto de coleta fica na borda da página (o mais externo), para que o transportador possa destacá-lo sem remover o canhoto de entrega; cada canhoto é identificado no texto e nos rótulos de assinatura.
+- **Exemplo**:
+    ```python
+    config.carrier_receipt = True
+    ```
+- **Padrão**: `False`
+
+---
+
 **Configuração Decimal**
 
 - **Tipo**: `DecimalConfig`

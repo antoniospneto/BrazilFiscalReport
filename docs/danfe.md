@@ -107,6 +107,18 @@ Here is a breakdown of all the configuration options available in `DanfeConfig`:
 
 ---
 
+**Carrier Receipt**
+
+- **Type**: `bool`
+- **Description**: When set to `True`, prints an extra receipt (*canhoto de coleta*) for the carrier to sign when picking up the goods, in addition to the regular delivery receipt (*canhoto de entrega*). The extra receipt is only printed when the NF-e has a carrier (`transporta`) informed. The collection receipt is placed at the page edge (the outermost one), so the carrier can detach it without removing the delivery receipt; each receipt is identified in its text and signature labels.
+- **Example**:
+    ```python
+    config.carrier_receipt = True
+    ```
+- **Default**: `False`
+
+---
+
 **Decimal Configuration**
 
 - **Type**: `DecimalConfig`

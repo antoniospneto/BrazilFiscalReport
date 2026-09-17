@@ -75,6 +75,13 @@ BFR_GENERATE_EXPECTED=1 pytest tests/test_danfe.py
 !!! note
     Do not set `generate=True` directly in test code — a pre-commit hook (`no-generate-true`) blocks it. Always use the `BFR_GENERATE_EXPECTED=1` environment variable instead.
 
+!!! warning
+    Regenerate reference PDFs with the same `fpdf2` version as the CI, which always installs the latest release. Different `fpdf2` versions can write different PDF content (e.g. the rotation matrix of the watermark) even when the page looks identical, so a reference generated with an older version passes locally but fails in the CI. Update it before regenerating:
+
+    ```bash
+    pip install --upgrade fpdf2
+    ```
+
 ## Working on Documentation
 
 The documentation site uses [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) with the [mkdocs-static-i18n](https://github.com/ultrabug/mkdocs-static-i18n) plugin. Every page is a pair of files: `page.md` (English) and `page.pt.md` (Portuguese) — keep both in sync when editing.

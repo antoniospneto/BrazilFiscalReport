@@ -81,7 +81,7 @@ def assert_pdf_equal(
     else:
         expected_pdf_path = tmp_path / "expected.pdf"
         with expected_pdf_path.open("wb") as pdf_file:
-            if isinstance(expected, (bytes, bytearray)):
+            if isinstance(expected, bytes | bytearray):
                 pdf_file.write(expected)
             else:
                 expected.set_creation_date(EPOCH)

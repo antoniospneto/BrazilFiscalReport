@@ -8,7 +8,7 @@
 pip install brazilfiscalreport
 ```
 
-Isso instala a biblioteca principal com suporte para **DANFE** e **DACCe**. Requer Python 3.8+.
+Isso instala a biblioteca principal com suporte para **DANFE** e **DACCe**. Requer Python 3.10+.
 
 ### Dependências opcionais
 

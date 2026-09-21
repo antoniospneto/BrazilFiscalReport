@@ -8,7 +8,7 @@
 pip install brazilfiscalreport
 ```
 
-This installs the core library with support for **DANFE** and **DACCe**. Requires Python 3.8+.
+This installs the core library with support for **DANFE** and **DACCe**. Requires Python 3.10+.
 
 ### Optional dependencies
 

@@ -45,7 +45,7 @@ Every Brazilian electronic invoice is issued by the tax authority as an XML file
 - 📄 **4 document types** — DANFE, DACTE, DAMDFE and DANFSe (plus the DACCe correction-letter event), straight from the official XML
 - 🎨 **Customizable** — issuer logo, margins, fonts, decimal precision, cancellation watermarks and more
 - ⚡ **3 ways to use it** — Python API, `bfrep` command line, or the [online demo](https://brazilfiscalreport.streamlit.app)
-- ✅ **Python 3.8+** — tested on Python 3.8 through 3.13
+- ✅ **Python 3.10+** — tested on Python 3.10 through 3.14
 
 ## Installation
 

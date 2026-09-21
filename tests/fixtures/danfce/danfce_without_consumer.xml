@@ -63,7 +63,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>8.29</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -127,7 +127,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>23.08</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>2</orig>
@@ -191,7 +191,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>3.19</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>

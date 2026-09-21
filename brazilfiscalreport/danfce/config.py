@@ -35,3 +35,9 @@ class DanfceConfig:
     margins: Margins = field(default_factory=Margins)
     decimal_config: DecimalConfig = field(default_factory=DecimalConfig)
     font_type: FontType = FontType.TIMES
+    # Largura da bobina em mm. 80 e 58 são os formatos usuais das
+    # impressoras térmicas não fiscais.
+    paper_width: Number = 80
+    # Altura da "folha" enviada à impressora. Como a bobina é contínua, o
+    # valor só define onde o cupom quebra em páginas.
+    paper_height: Number = 300

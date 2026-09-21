@@ -45,8 +45,8 @@
                 <CRT>3</CRT>
             </emit>
             <dest>
-                <CNPJ>19602452000171</CNPJ>
-                <xNome>Empresa Teste</xNome>
+                <idEstrangeiro>AB123456789</idEstrangeiro>
+                <xNome>John Doe</xNome>
                 <enderDest>
                     <xLgr>Rua do Bosque</xLgr>
                     <nro>238</nro>

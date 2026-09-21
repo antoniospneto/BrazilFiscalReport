@@ -9,48 +9,48 @@ from ..utils import (
     format_number,
     get_date_utc,
     get_tag_text,
+    to_float,
 )
 from ..xfpdf import xFPDF
 from .config import DanfceConfig
+from .danfce_conf import (
+    CONTINGENCY_NOTICE,
+    HOMOLOGATION_NOTICE,
+    NO_ICMS_CREDIT_NOTICE,
+    PENDING_AUTH_NOTICE,
+    TITLE,
+    TOTAL_ADDITIONS,
+    TOTAL_DEDUCTIONS,
+    TP_EMISSAO_NORMAL,
+    TP_PAGAMENTO,
+    URL,
+)
 
-URL = ".//{http://www.portalfiscal.inf.br/nfe}"
-
-TP_PAGAMENTO = {
-    "01": "Dinheiro",
-    "02": "Cheque",
-    "03": "Cartão de Crédito",
-    "04": "Cartão de Débito",
-    "05": "Cartão da Loja / Crediário",
-    "10": "Vale Alimentação",
-    "11": "Vale Refeição",
-    "12": "Vale Presente",
-    "13": "Vale Combustível",
-    "14": "Duplicata Mercantil",
-    "15": "Boleto Bancário",
-    "16": "Depósito Bancário",
-    "17": "PIX Dinâmico",
-    "18": "Transferência Bancária / Carteira Digital",
-    "19": "Programa de Fidelidade / Cashback / Crédito Virtual",
-    "20": "PIX Estático",
-    "21": "Crédito em Loja",
-    "22": "Pagamento Eletrônico não Informado",
-    "90": "Sem Pagamento",
-    "91": "Pagamento Posterior",
-    "99": "Outros",
-}
+# Altura de uma linha de texto do bloco de itens.
+ITEM_LINE_HEIGHT = 3.5
+# Largura da coluna de código do produto.
+ITEM_CODE_WIDTH = 17
+# Largura das colunas dos operadores "x" e "=" da sublinha de valores.
+ITEM_OPERATOR_WIDTH = 4
+# Lado do QR Code, em mm.
+QR_CODE_SIZE = 36
 
 
 def extract_text(node: Element | None, tag: str) -> str:
     if node is None:
         return ""
-    return get_tag_text(node, URL, tag)
+    # O strip é obrigatório: qrCode/urlChave costumam vir em CDATA indentado,
+    # e a indentação acabaria dentro do payload do QR Code.
+    return (get_tag_text(node, URL, tag) or "").strip()
 
 
 class Danfce(xFPDF):
-    def __init__(self, xml: str, config: DanfceConfig | None = None):
-        super().__init__(unit="mm", format=(80, 300))
-
+    def __init__(self, xml, config: DanfceConfig | None = None):
         self.config = config if config is not None else DanfceConfig()
+        super().__init__(
+            unit="mm",
+            format=(self.config.paper_width, self.config.paper_height),
+        )
         self.set_margins(
             left=self.config.margins.left,
             top=self.config.margins.top,
@@ -61,269 +61,279 @@ class Danfce(xFPDF):
         self.default_font = self.config.font_type.value
         self.price_precision = self.config.decimal_config.price_precision
         self.quantity_precision = self.config.decimal_config.quantity_precision
-        self.orientation = "P"
         self.root = ET.fromstring(xml)
-        self.add_page(orientation=self.orientation)
-        self.colw = self._content_width() / 2
         self.data = self._parse_xml()
 
+        self.add_page()
         self._draw_header()
         self._draw_items()
         self._draw_totals()
         self._draw_payments()
+        self._draw_additional_info()
         self._draw_footer()
 
-    def _money(self, value):
-        if value in (None, ""):
-            return "-"
-        return f"R$ {format_number(value, self.price_precision)}"
+    # --- Leitura do XML ---
 
     def _parse_xml(self):
-        """Centralize all XML tags here."""
-
-        def format_address(tag):
-            return (
-                ", ".join(
-                    part
-                    for part in (text(tag, "xLgr"), text(tag, "nro"), text(tag, "xCpl"))
-                    if part
-                )
-                or "-"
-            )
-
-        def format_neighborhood(tag):
-            city = (
-                "/".join(part for part in (text(tag, "xMun"), text(tag, "UF")) if part)
-                or "-"
-            )
-
-            return " - ".join(
-                part
-                for part in (
-                    text(tag, "xBairro"),
-                    city,
-                    format_cep(text(tag, "CEP")) or "-",
-                )
-                if part and part != "-"
-            )
-
-        def format_person_id(tag):
-            cpf = text(tag, "CPF")
-            cnpj = text(tag, "CNPJ")
-            label = "CPF" if cpf else "CNPJ"
-            cpf_cnpj_person = format_cpf_cnpj(cpf or cnpj)
-
-            return f"{label}: {cpf_cnpj_person}".strip()
-
-        self.inf_nfe = self.root.find(f"{URL}infNFe")
-        if self.inf_nfe is None:
+        """Centraliza a leitura do XML: o desenho só consome o dict daqui."""
+        inf_nfe = self.root.find(f"{URL}infNFe")
+        if inf_nfe is None:
             raise ValueError("XML inválido para o DANFC-e: grupo infNFe é obrigatório.")
 
-        self.ide = self.root.find(f"{URL}ide")
-        self.inf_nfe_supl = self.root.find(f"{URL}infNFeSupl")
-        self.emit = self.root.find(f"{URL}emit")
-        self.dest = self.root.find(f"{URL}dest")
-        self.total = self.root.find(f"{URL}total")
-        self.pag = self.root.find(f"{URL}pag")
-        self.det = self.root.findall(f"{URL}det")
-        self.inf_adic = self.root.find(f"{URL}infAdic")
-        self.prot_nfe = self.root.find(f"{URL}protNFe")
+        ide = self.root.find(f"{URL}ide")
+        emit = self.root.find(f"{URL}emit")
+        dest = self.root.find(f"{URL}dest")
+        total = self.root.find(f"{URL}total")
+        pag = self.root.find(f"{URL}pag")
+        inf_adic = self.root.find(f"{URL}infAdic")
+        inf_nfe_supl = self.root.find(f"{URL}infNFeSupl")
+        prot = self.root.find(f"{URL}protNFe")
+        dets = self.root.findall(f"{URL}det")
 
-        title = (
-            "DANFE NFC-e - Documento Auxiliar da Nota Fiscal de Consumidor Eletrônica"
-        )
-        self.key_nfe = (
-            self.inf_nfe.attrib.get("Id")[3:] if self.inf_nfe is not None else ""
-        )
+        key_nfe = (inf_nfe.attrib.get("Id") or "")[3:]
+        dt_emi, hr_emi = get_date_utc(extract_text(ide, "dhEmi"))
+        dt_aut, hr_aut = get_date_utc(extract_text(prot, "dhRecbto"))
 
-        def text(node, tag):
-            return extract_text(node, tag)
+        items = self._parse_items(dets)
+        totals = self._parse_totals(total, dets, len(items))
 
-        emit = self.emit
-        dest = self.dest
-        ide = self.ide
-        total = self.total
-        inf_supl = self.inf_nfe_supl
-        prot = self.prot_nfe
+        return {
+            "notices": self._parse_notices(ide, prot),
+            "issuer": {
+                "name": extract_text(emit, "xNome") or "-",
+                "fant": extract_text(emit, "xFant") or "-",
+                "id": self._format_person_id(emit),
+                "ie": extract_text(emit, "IE") or "-",
+                "address": self._format_address(emit),
+                "neighborhood": self._format_neighborhood(emit),
+            },
+            "identification_info": (
+                f"Número: {extract_text(ide, 'nNF')}"
+                f"  Série: {extract_text(ide, 'serie')}"
+                f"  Emissão: {dt_emi} {hr_emi}".strip()
+            ),
+            "items": items,
+            "totals": totals,
+            "payments": self._parse_payments(pag),
+            "change": format_number(extract_text(pag, "vTroco"), self.price_precision),
+            "consumer": self._parse_consumer(dest),
+            "additional_info": extract_text(inf_adic, "infCpl"),
+            "footer": {
+                "key": " ".join(chunks(key_nfe, 4)),
+                "qr_code": extract_text(inf_nfe_supl, "qrCode"),
+                "url": extract_text(inf_nfe_supl, "urlChave"),
+                "authorized": prot is not None,
+                "protocol": extract_text(prot, "nProt"),
+                "authorized_at": f"{dt_aut} {hr_aut}".strip(),
+            },
+        }
 
-        emit_id = format_person_id(emit)
+    def _parse_notices(self, ide, prot):
+        """Avisos que tiram o valor fiscal do cupom, impressos sob o título."""
+        notices = []
+        if extract_text(ide, "tpAmb") == "2":
+            notices.append(HOMOLOGATION_NOTICE)
+        tp_emis = extract_text(ide, "tpEmis")
+        if tp_emis and tp_emis != TP_EMISSAO_NORMAL:
+            notices.append(CONTINGENCY_NOTICE)
+        if prot is None:
+            notices.append(PENDING_AUTH_NOTICE)
+        return notices
 
+    def _parse_items(self, dets):
         items = []
-        for det in self.det:
+        for det in dets:
             prod = det.find(f"{URL}prod")
             if prod is None:
                 continue
             items.append(
                 {
-                    "code": text(prod, "cProd") or "-",
-                    "description": text(prod, "xProd") or "-",
+                    "code": extract_text(prod, "cProd") or "-",
+                    "description": extract_text(prod, "xProd") or "-",
                     "quantity": format_number(
-                        text(prod, "qCom"), self.quantity_precision
+                        extract_text(prod, "qCom"), self.quantity_precision
                     ),
-                    "unit": text(prod, "uCom") or "-",
+                    "unit": extract_text(prod, "uCom") or "-",
                     "unit_value": format_number(
-                        text(prod, "vUnCom"), self.price_precision
+                        extract_text(prod, "vUnCom"), self.price_precision
                     ),
                     "total_value": format_number(
-                        text(prod, "vProd"), self.price_precision
+                        extract_text(prod, "vProd"), self.price_precision
                     ),
                 }
             )
+        return items
 
-        v_frete = float(get_tag_text(total, URL, "vFrete")) or 0
-        v_seg = float(get_tag_text(total, URL, "vSeg")) or 0
-        v_outro = float(get_tag_text(total, URL, "vOutro")) or 0
-        v_desc = float(get_tag_text(total, URL, "vDesc")) or 0
+    def _parse_totals(self, total, dets, item_count):
+        additions = sum(to_float(extract_text(total, tag)) for tag in TOTAL_ADDITIONS)
+        deductions = sum(to_float(extract_text(total, tag)) for tag in TOTAL_DEDUCTIONS)
 
-        v_increase = v_frete + v_seg + v_outro
+        # vTotTrib pode vir só nos itens; o manual aceita as duas origens.
+        taxes = to_float(extract_text(total, "vTotTrib"))
+        if not taxes:
+            taxes = sum(
+                to_float(extract_text(det.find(f"{URL}imposto"), "vTotTrib"))
+                for det in dets
+            )
 
-        payments = []
-        if self.pag is not None:
-            for payment in self.pag.findall(f"{URL}detPag"):
-                payments.append(
-                    {
-                        "type": text(payment, "tPag") or "-",
-                        "value": format_number(
-                            text(payment, "vPag"), self.price_precision
-                        ),
-                    }
-                )
-
-        cpf = text(dest, "CPF")
-        cnpj = text(dest, "CNPJ")
-
-        if cpf or cnpj:
-            consumer_name = text(dest, "xNome")
-            consumer_id = format_person_id(dest)
-            id_consumer = f"{consumer_id}  {consumer_name}".strip()
-        else:
-            id_consumer = ""
-
-        dt_emi, hr_emi = get_date_utc(text(ide, "dhEmi"))
-        dt_aut, hr_aut = get_date_utc(text(prot, "dhRecbto"))
-
-        n_nf = text(ide, "nNF")
-        serie = text(ide, "serie")
-        nfc_info = f"Número: {n_nf}  Série: {serie}  Emissão: {dt_emi} {hr_emi}".strip()
-
-        nfce_key = " ".join(chunks(self.key_nfe, 4))
+        def money(value):
+            return format_number(str(value), self.price_precision)
 
         return {
-            "title": title,
-            "environment": text(ide, "tpAmb"),
-            "authorized": prot is not None,
-            "issuer": {
-                "name": text(emit, "xNome") or "-",
-                "fant": text(emit, "xFant") or "-",
-                "id": emit_id,
-                "ie": text(emit, "IE") or "-",
-                "address": format_address(emit),
-                "neighborhood": format_neighborhood(emit),
-            },
-            "identification_info": nfc_info,
-            "items": items,
-            "totals": {
-                "products": format_number(text(total, "vProd"), self.price_precision),
-                "invoice": self._money(text(total, "vNF")),
-                "taxes": format_number(
-                    text(total, "vTotTrib") or "0", self.price_precision
-                ),
-                "item_quantity": format_number(
-                    str(len(items)), self.quantity_precision
-                ),
-                "increase": format_number(str(v_increase), self.price_precision)
-                if v_increase > 0
-                else 0,
-                "discount": format_number(str(v_desc), self.price_precision)
-                if v_desc > 0
-                else 0,
-            },
-            "payments": payments,
-            "change": format_number(text(self.pag, "vTroco"), self.price_precision),
-            "consumer": {
-                "credentials": id_consumer,
-                "address": format_address(dest),
-                "neighborhood": text(dest, "xBairro") or "-",
-            },
-            "footer": {
-                "key": nfce_key,
-                "qr_code": text(inf_supl, "qrCode"),
-                "url": text(inf_supl, "urlChave"),
-                "protocol": text(prot, "nProt"),
-                "authorized_at": f"{dt_aut} {hr_aut}".strip(),
-            },
+            "products": money(to_float(extract_text(total, "vProd"))),
+            "payable": money(to_float(extract_text(total, "vNF"))),
+            "taxes": money(taxes),
+            "item_quantity": str(item_count),
+            # Vazio quando não há valor, para o desenho suprimir a linha.
+            "increase": money(additions) if additions else "",
+            "discount": money(deductions) if deductions else "",
         }
+
+    def _parse_payments(self, pag):
+        payments = []
+        if pag is None:
+            return payments
+        for payment in pag.findall(f"{URL}detPag"):
+            t_pag = extract_text(payment, "tPag")
+            payments.append(
+                {
+                    # xPag descreve o meio de pagamento quando tPag=99.
+                    "type": extract_text(payment, "xPag")
+                    or TP_PAGAMENTO.get(t_pag, "Outros"),
+                    "value": format_number(
+                        extract_text(payment, "vPag"), self.price_precision
+                    ),
+                }
+            )
+        return payments
+
+    def _parse_consumer(self, dest):
+        credentials = self._format_person_id(dest)
+        if not credentials:
+            return {"credentials": "", "address": "", "neighborhood": ""}
+        name = extract_text(dest, "xNome")
+        return {
+            "credentials": f"{credentials}  {name}".strip(),
+            "address": self._format_address(dest),
+            "neighborhood": self._format_neighborhood(dest),
+        }
+
+    @staticmethod
+    def _format_person_id(node):
+        """Rótulo + documento do emitente ou do consumidor, quando houver."""
+        for label, tag in (("CNPJ", "CNPJ"), ("CPF", "CPF")):
+            value = extract_text(node, tag)
+            if value:
+                return f"{label}: {format_cpf_cnpj(value)}"
+        foreign = extract_text(node, "idEstrangeiro")
+        return f"Id. Estrangeiro: {foreign}" if foreign else ""
+
+    @staticmethod
+    def _format_address(node):
+        parts = (
+            extract_text(node, "xLgr"),
+            extract_text(node, "nro"),
+            extract_text(node, "xCpl"),
+        )
+        return ", ".join(part for part in parts if part) or "-"
+
+    @staticmethod
+    def _format_neighborhood(node):
+        city = "/".join(
+            part
+            for part in (extract_text(node, "xMun"), extract_text(node, "UF"))
+            if part
+        )
+        cep = extract_text(node, "CEP")
+        parts = (
+            extract_text(node, "xBairro"),
+            city,
+            format_cep(cep) if cep else "",
+        )
+        return " - ".join(part for part in parts if part) or "-"
 
     # --- Funções Auxiliares ---
 
     def _draw_split_row(
         self,
-        left_text: str,
-        right_text: str,
-        left_font: str = "",
-        right_font: str = "B",
-        size: int = 7,
-    ) -> None:
+        left_text,
+        right_text,
+        left_font="",
+        right_font="B",
+        size=7,
+    ):
         """
         Helper para padronizar linhas divididas em duas colunas
         (Ex: CNPJ | IE, Qtd | Valor).
         """
-        y_id = self.get_y()
-        content_width = self._content_width()
-        left_width = content_width * 0.68
-        right_width = content_width - left_width
-
-        self.set_xy(self.l_margin, y_id)
-
-        self.set_font(self.default_font, left_font, size)
-        self.cell(
-            w=left_width,
-            h=3,
-            text=self.long_field(text=left_text, limit=left_width),
-            border=0,
-            align="L",
-        )
-
+        # A coluna da direita leva só o que o valor precisa (no máximo metade
+        # da largura útil); o resto fica com o rótulo, que é quem costuma
+        # transbordar em bobinas estreitas.
         self.set_font(self.default_font, right_font, size)
-        self.cell(
-            w=right_width,
-            h=3,
-            text=self.long_field(text=right_text, limit=right_width),
-            border=0,
-            align="R",
-            new_x="LMARGIN",
-            new_y="NEXT",
-        )
+        # +3 = os 2mm que o long_field reserva internamente, mais 1mm de
+        # calha; com folga zero o arredondamento chega a cortar o valor.
+        right_width = min(self.get_string_width(right_text) + 3, self.epw * 0.5)
+        left_width = self.epw - right_width
 
-    def _draw_centered_text(
-        self, text: str, font_style: str = "", size: int = 8, add_ln: float = 0
-    ) -> None:
+        # O rótulo quebra em linhas em vez de ser truncado: textos exigidos
+        # por lei (Lei 12.741/2012) não podem sair pela metade em bobina
+        # estreita. O valor fica na primeira linha.
+        self.set_font(self.default_font, left_font, size)
+        left_lines = self.wrap_text(left_text, left_width) or [""]
+
+        for index, line in enumerate(left_lines):
+            self.set_xy(self.l_margin, self.get_y())
+
+            self.set_font(self.default_font, left_font, size)
+            self.cell(w=left_width, h=3, text=line, border=0, align="L")
+
+            self.set_font(self.default_font, right_font, size)
+            self.cell(
+                w=right_width,
+                h=3,
+                text=self.long_field(text=right_text, limit=right_width)
+                if index == 0
+                else "",
+                border=0,
+                align="R",
+                new_x="LMARGIN",
+                new_y="NEXT",
+            )
+
+    def _draw_centered_text(self, text, font_style="", size=8, add_ln=0):
         """Helper para imprimir múltiplos textos centralizados de forma padronizada."""
-        if not text:
-            return
-        self.set_font(self.default_font, font_style, size)
-        for line in self._wrap_text(text, self._content_width()):
-            self.cell(
-                w=0, h=4, text=line, border=0, new_x="LMARGIN", new_y="NEXT", align="C"
-            )
-        if add_ln:
-            self.ln(add_ln)
+        self._draw_flow_text(text, "C", 4, font_style, size, add_ln)
 
-    def _draw_left_text(
-        self, text: str, font_style: str = "", size: int = 8, add_ln: float = 0
-    ) -> None:
+    def _draw_left_text(self, text, font_style="", size=8, add_ln=0):
         """Helper para imprimir múltiplos textos alinhados à esquerda."""
+        self._draw_flow_text(text, "L", 3, font_style, size, add_ln)
+
+    def _draw_flow_text(self, text, align, line_height, font_style, size, add_ln):
         if not text:
             return
         self.set_font(self.default_font, font_style, size)
-        for line in self._wrap_text(text, self._content_width()):
+        for line in self.wrap_text(text, self.epw):
             self.cell(
-                w=0, h=3, text=line, border=0, new_x="LMARGIN", new_y="NEXT", align="L"
+                w=0,
+                h=line_height,
+                text=line,
+                border=0,
+                new_x="LMARGIN",
+                new_y="NEXT",
+                align=align,
             )
         if add_ln:
             self.ln(add_ln)
 
-    def _draw_header(self) -> None:
+    def _draw_line(self):
+        self.set_draw_color(0, 0, 0)
+        self.set_line_width(0.1)
+        self.line(self.l_margin, self.get_y(), self.w - self.r_margin, self.get_y())
+        self.ln(0.5)
+
+    # --- Blocos do documento ---
+
+    def _draw_header(self):
         issuer = self.data["issuer"]
 
         self._draw_centered_text(issuer["fant"], font_style="B", add_ln=2)
@@ -336,90 +346,147 @@ class Danfce(xFPDF):
         self._draw_left_text(f"Bairro: {issuer['neighborhood']}", size=7, add_ln=1)
 
         self._draw_line()
-        self._draw_centered_text(self.data["title"], font_style="B", add_ln=1)
+        self._draw_centered_text(TITLE, font_style="B")
+        self._draw_centered_text(NO_ICMS_CREDIT_NOTICE, size=7, add_ln=1)
 
-    def _draw_items_layout(
-        self, code, description, quant, uom, unit_val, total_amount, border=False
-    ) -> None:
-        self.set_font(self.default_font, "B", 7)
+        for notice in self.data["notices"]:
+            self._draw_centered_text(notice, font_style="B")
+        if self.data["notices"]:
+            self.ln(1)
+
+    def _wrap_item(self, code, description, bold):
+        """Quebra código e descrição nas respectivas colunas, com a fonte do item."""
+        self.set_font(self.default_font, "B" if bold else "", 7)
+        code_lines = self.wrap_text(code, ITEM_CODE_WIDTH) or [""]
+        desc_lines = self.wrap_text(description, self.epw - ITEM_CODE_WIDTH - 1) or [""]
+        return code_lines, desc_lines
+
+    def _draw_item_cells(
+        self,
+        code_lines,
+        desc_lines,
+        quant,
+        uom,
+        unit_val,
+        total_amount,
+        fill=False,
+    ):
         x0 = self.l_margin
-        w = self._content_width()
-        h = 3.5
+        w = self.epw
+        h = ITEM_LINE_HEIGHT
         y0 = self.get_y()
-
-        # Define as larguras máximas para código e descrição
-        code_width = 17
-        desc_width = w - code_width - 1
-
-        # Quebra os textos para caberem exatamente em suas colunas
-        code_lines = self._wrap_text(code, code_width) or [""]
-        desc_lines = self._wrap_text(description, desc_width) or [""]
-
-        # Identifica qual coluna consumiu mais linhas para definir a altura do bloco
         num_lines = max(len(code_lines), len(desc_lines))
-        total_block_height = (num_lines + 1) * h
 
-        if border:
+        if fill:
             self.set_fill_color(242, 242, 242)
-            self.rect(x0, y0, w, total_block_height, style="DF")
+            self.rect(x0, y0, w, (num_lines + 1) * h, style="DF")
             self.set_fill_color(255, 255, 255)
 
         # Renderiza a coluna do Código
         y_temp = y0
         for line in code_lines:
             self.set_xy(x0 + 1, y_temp)
-            self.cell(w=code_width, h=h, text=line, align="L")
+            self.cell(w=ITEM_CODE_WIDTH, h=h, text=line, align="L")
             y_temp += h
 
         # Renderiza a coluna da Descrição
         y_temp = y0
         for line in desc_lines:
-            self.set_xy(x0 + code_width + 1, y_temp)
-            self.cell(w=desc_width, h=h, text=line, align="L")
+            self.set_xy(x0 + ITEM_CODE_WIDTH + 1, y_temp)
+            self.cell(w=w - ITEM_CODE_WIDTH - 1, h=h, text=line, align="L")
             y_temp += h
 
         # Define a posição Y da sublinha (Qtde / Valor)
         y1 = y0 + (num_lines * h)
 
-        col_qtd, col_x, col_vunit, col_eq, col_vtotal = (
-            w * 0.15,
-            w * 0.12,
-            w * 0.24,
-            w * 0.06,
-            w * 0.25,
-        )
-        x = x0 + w * 0.18
+        col_qtd, col_vunit, col_vtotal = self.amount_columns
+        block = col_qtd + col_vunit + col_vtotal + 2 * ITEM_OPERATOR_WIDTH
+        # Encosta o bloco à direita; a folga que sobrar vira recuo à esquerda.
+        x = max(x0, x0 + w - block)
 
-        self.set_xy(x, y1)
-        self.cell(w=col_qtd, h=h, text=f"{quant} {uom}", align="L")
-        x += col_qtd
-        self.set_xy(x, y1)
-        self.cell(w=col_x, h=h, text="x", align="C")
-        x += col_x
-        self.set_xy(x, y1)
-        self.cell(w=col_vunit, h=h, text=unit_val, align="C")
-        x += col_vunit
-        self.set_xy(x, y1)
-        self.cell(w=col_eq, h=h, text="=", align="C")
-        x += col_eq
-        self.set_xy(x, y1)
-        self.cell(w=col_vtotal, h=h, text=total_amount, align="R")
+        for width, text, align in (
+            (col_qtd, f"{quant} {uom}", "L"),
+            (ITEM_OPERATOR_WIDTH, "x", "C"),
+            (col_vunit, unit_val, "R"),
+            (ITEM_OPERATOR_WIDTH, "=", "C"),
+            (col_vtotal, total_amount, "R"),
+        ):
+            self.set_xy(x, y1)
+            self.cell(w=width, h=h, text=text, align=align)
+            x += width
 
-        """
-            Atualiza a posição final do cursor para que o item ou
-            o totalizador sejam desenhados corretamente
-        """
+        # Atualiza a posição final do cursor para que o próximo item ou o
+        # totalizador sejam desenhados logo abaixo do bloco.
         self.set_y(y1 + h)
 
-    def _draw_items(self) -> None:
-        self._draw_items_layout(
-            "Código", "Descrição", "Qtde", "Un", "Valor Unitário", "Valor Total", True
+    def _draw_items_header(self):
+        code_lines, desc_lines = self._wrap_item("Código", "Descrição", bold=True)
+        self._draw_item_cells(
+            code_lines,
+            desc_lines,
+            "Qtde",
+            "Un",
+            "Valor Unitário",
+            "Valor Total",
+            fill=True,
         )
 
+    def _measure_amount_columns(self):
+        """
+        Larguras da sublinha "qtde un x unitário = total".
+
+        Medidas sobre o conteúdo mais largo do documento (cabeçalho incluso)
+        em vez de frações fixas da bobina: assim as colunas ficam alinhadas
+        entre os itens e nenhuma invade a vizinha em bobinas estreitas.
+        """
+        rows = [(("Qtde", "Un", "Valor Unitário", "Valor Total"), "B")]
+        rows += [
+            (
+                (
+                    item["quantity"],
+                    item["unit"],
+                    item["unit_value"],
+                    item["total_value"],
+                ),
+                "",
+            )
+            for item in self.data["items"]
+        ]
+
+        widths = [0.0, 0.0, 0.0]
+        for (quant, uom, unit_val, total_val), style in rows:
+            self.set_font(self.default_font, style, 7)
+            for index, text in enumerate((f"{quant} {uom}", unit_val, total_val)):
+                widths[index] = max(widths[index], self.get_string_width(text) + 1)
+
+        # Não deixa o bloco passar da largura útil quando o conteúdo é enorme.
+        available = self.epw - 2 * ITEM_OPERATOR_WIDTH
+        if sum(widths) > available:
+            factor = available / sum(widths)
+            widths = [width * factor for width in widths]
+        return widths
+
+    def _draw_items(self):
+        self.amount_columns = self._measure_amount_columns()
+        self._draw_items_header()
+
         for item in self.data["items"]:
-            self._draw_items_layout(
-                item["code"],
-                item["description"],
+            code_lines, desc_lines = self._wrap_item(
+                item["code"], item["description"], bold=False
+            )
+            # O bloco é desenhado em coordenadas absolutas, que não sobrevivem
+            # à quebra automática do fpdf2: reserva o espaço antes (+0.5mm do
+            # traço separador) e repete o cabeçalho na página nova.
+            block_height = (max(len(code_lines), len(desc_lines)) + 1) * (
+                ITEM_LINE_HEIGHT
+            ) + 0.5
+            if self.ensure_space(block_height):
+                self._draw_items_header()
+                self.set_font(self.default_font, "", 7)
+
+            self._draw_item_cells(
+                code_lines,
+                desc_lines,
                 item["quantity"],
                 item["unit"],
                 item["unit_value"],
@@ -427,47 +494,51 @@ class Danfce(xFPDF):
             )
             self._draw_line()
 
-    def _draw_totals(self) -> None:
+    def _draw_totals(self):
         totals = self.data["totals"]
 
-        self._draw_split_row(
-            "QTD. TOTAL DE ITENS", totals["item_quantity"], left_font=""
-        )
-        self._draw_split_row("VALOR TOTAL R$:", totals["products"], left_font="")
-
-        if totals["increase"]:
-            self._draw_split_row("ACRÉSCIMO R$:", totals["increase"], left_font="")
+        self._draw_split_row("QTD. TOTAL DE ITENS", totals["item_quantity"])
+        self._draw_split_row("VALOR TOTAL R$:", totals["products"])
 
         if totals["discount"]:
-            self._draw_split_row("DESCONTO R$:", totals["discount"], left_font="")
+            self._draw_split_row("DESCONTO R$:", totals["discount"])
 
+        if totals["increase"]:
+            self._draw_split_row("ACRÉSCIMO R$:", totals["increase"])
+
+        self._draw_split_row(
+            "VALOR A PAGAR R$:", totals["payable"], left_font="B", right_font="B"
+        )
         self.ln(1)
 
-    def _draw_payments(self) -> None:
-        totals = self.data["totals"]
-
+    def _draw_payments(self):
         self._draw_split_row(
             "FORMA DE PAGAMENTO", "Valor Pago", left_font="B", right_font="B"
         )
         self.ln(2)
 
         for payment in self.data["payments"]:
-            payment_type = TP_PAGAMENTO.get(payment["type"], "Outros")
             self._draw_split_row(
-                payment_type, payment["value"], left_font="", right_font="", size=8
+                payment["type"],
+                payment["value"],
+                left_font="",
+                right_font="",
+                size=8,
             )
             self.ln(2)
 
-        self._draw_left_text(f"(TOTAL PAGO: {totals['invoice']})")
         self._draw_split_row(
-            "TROCO R$:", self.data["change"], left_font="B", right_font="B", size=8
+            "TROCO R$:",
+            self.data["change"],
+            left_font="B",
+            right_font="B",
+            size=8,
         )
         self.ln(2)
 
-        # Resolvido o TODO: Puxando o total de tributos extraído no _parse_xml
         self._draw_split_row(
             "Informação dos Tributos Totais Incidentes",
-            totals["taxes"],
+            self.data["totals"]["taxes"],
             left_font="",
             right_font="",
             size=8,
@@ -476,8 +547,14 @@ class Danfce(xFPDF):
 
         self._draw_line()
 
-    def _draw_footer(self) -> None:
-        self._ensure_space(60)
+    def _draw_additional_info(self):
+        """Mensagem de interesse do contribuinte (infAdic/infCpl)."""
+        if not self.data["additional_info"]:
+            return
+        self._draw_left_text(self.data["additional_info"], size=7, add_ln=1)
+        self._draw_line()
+
+    def _draw_footer(self):
         footer = self.data["footer"]
         consumer = self.data["consumer"]
 
@@ -508,62 +585,29 @@ class Danfce(xFPDF):
         self._draw_line()
         self.ln(1)
 
+        # O QR Code é posicionado em coordenada absoluta, então precisa caber
+        # inteiro — junto da legenda acima e do protocolo abaixo.
+        self.ensure_space(QR_CODE_SIZE + 18)
         self._draw_centered_text("Consulta via leitor de QR Code", add_ln=1)
 
         if footer["qr_code"]:
-            box_size = 36
             y_top = self.get_y()
-            x_offset = self.l_margin + (self._content_width() - box_size) / 2 - 1
-            y_offset = y_top - self.t_margin
-
+            # draw_qr_code desenha em (x_offset + 1, t_margin + y_offset + 1).
             draw_qr_code(
                 self,
                 footer["qr_code"],
                 0,
-                x_offset,
-                y_offset,
-                box_size=box_size,
+                self.l_margin + (self.epw - QR_CODE_SIZE) / 2 - 1,
+                y_top - self.t_margin - 1,
+                box_size=QR_CODE_SIZE,
                 border=2,
             )
-            self.set_y(y_top + box_size + 4)
+            self.set_y(y_top + QR_CODE_SIZE + 4)
         else:
             self.ln(4)
 
-        self._draw_centered_text("Protocolo de Autorização")
-        self._draw_centered_text(f"{footer['protocol']}  {footer['authorized_at']}")
-
-    # --- Utilitários da Classe ---
-
-    def _content_width(self) -> float:
-        return self.w - self.l_margin - self.r_margin
-
-    def _wrap_text(self, text: str, max_width: float) -> list[str]:
-        if not text:
-            return []
-        words = text.split()
-        lines: list[str] = []
-        current = ""
-        for word in words:
-            candidate = f"{current} {word}".strip()
-            if not current:
-                current = word
-                continue
-            if self.get_string_width(candidate) <= max_width:
-                current = candidate
-            else:
-                lines.append(current)
-                current = word
-        if current:
-            lines.append(current)
-        return lines
-
-    def _ensure_space(self, required_height: float) -> None:
-        available = self.h - self.b_margin - self.get_y()
-        if required_height > 0 and available < required_height:
-            self.add_page()
-
-    def _draw_line(self) -> None:
-        self.set_draw_color(0, 0, 0)
-        self.set_line_width(0.1)
-        self.line(self.l_margin, self.get_y(), self.w - self.r_margin, self.get_y())
-        self.ln(0.5)
+        if footer["authorized"]:
+            self._draw_centered_text("Protocolo de Autorização")
+            self._draw_centered_text(f"{footer['protocol']}  {footer['authorized_at']}")
+        else:
+            self._draw_centered_text(PENDING_AUTH_NOTICE, font_style="B")

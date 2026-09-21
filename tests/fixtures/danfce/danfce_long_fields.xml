@@ -63,7 +63,7 @@
             </dest>
             <det nItem="1">
                 <prod>
-                    <cProd>ITE-007952</cProd>
+                    <cProd>789123456789012345678901234567890</cProd>
                     <cEAN>17898931140373</cEAN>
                     <xProd>BATATA CHIPS ONDULADA 20 X 45G</xProd>
                     <NCM>20052000</NCM>
@@ -129,7 +129,7 @@
                 <prod>
                     <cProd>ITE-001888</cProd>
                     <cEAN>SEM GTIN</cEAN>
-                    <xProd>BATATA CHIPS ONDULADA SABOR CHURRASCO 20 X 45G</xProd>
+                    <xProd>BATATA CHIPS ONDULADA SABOR CHURRASCO EMBALAGEM ECONOMICA MULTIPACK COM 20 UNIDADES DE 45G CADA</xProd>
                     <NCM>20052000</NCM>
                     <CEST>1703200</CEST>
                     <CFOP>6403</CFOP>

@@ -45,8 +45,8 @@
                 <CRT>3</CRT>
             </emit>
             <dest>
-                <CPF>12345678910</CPF>
-                <xNome>Cliente Teste</xNome>
+                <CNPJ>19602452000171</CNPJ>
+                <xNome>Empresa Teste</xNome>
                 <enderDest>
                     <xLgr>Rua do Bosque</xLgr>
                     <nro>238</nro>
@@ -80,7 +80,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>8.29</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -144,7 +144,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>23.08</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>2</orig>
@@ -208,7 +208,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>3.19</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -272,7 +272,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>8.29</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -336,7 +336,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>23.08</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>2</orig>
@@ -400,7 +400,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>3.19</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -464,7 +464,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>8.29</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -528,7 +528,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>23.08</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>2</orig>
@@ -592,7 +592,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>3.19</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -656,7 +656,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>8.29</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -720,7 +720,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>23.08</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>2</orig>
@@ -784,7 +784,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>3.19</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -848,7 +848,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>8.29</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -912,7 +912,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>23.08</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>2</orig>
@@ -976,7 +976,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>3.19</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -1040,7 +1040,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>8.29</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -1104,7 +1104,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>23.08</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>2</orig>
@@ -1168,7 +1168,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>3.19</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -1213,7 +1213,7 @@
                     </IBSCBS>
                 </imposto>
             </det>
-                <det nItem="19">
+            <det nItem="19">
                 <prod>
                     <cProd>ITE-007952</cProd>
                     <cEAN>17898931140373</cEAN>
@@ -1232,7 +1232,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>8.29</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -1296,7 +1296,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>23.08</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>2</orig>
@@ -1360,7 +1360,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>3.19</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -1424,7 +1424,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>8.29</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -1488,7 +1488,7 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>23.08</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>2</orig>
@@ -1552,7 +1552,775 @@
                     <indTot>1</indTot>
                 </prod>
                 <imposto>
-                    <vTotTrib>0.00</vTotTrib>
+                    <vTotTrib>3.19</vTotTrib>
+                    <ICMS>
+                        <ICMS60>
+                            <orig>0</orig>
+                            <CST>60</CST>
+                        </ICMS60>
+                    </ICMS>
+                    <PIS>
+                        <PISAliq>
+                            <CST>01</CST>
+                            <vBC>24.50</vBC>
+                            <pPIS>0.6500</pPIS>
+                            <vPIS>0.16</vPIS>
+                        </PISAliq>
+                    </PIS>
+                    <COFINS>
+                        <COFINSAliq>
+                            <CST>01</CST>
+                            <vBC>24.50</vBC>
+                            <pCOFINS>3.0000</pCOFINS>
+                            <vCOFINS>0.74</vCOFINS>
+                        </COFINSAliq>
+                    </COFINS>
+                    <IBSCBS>
+                        <CST>000</CST>
+                        <cClassTrib>000001</cClassTrib>
+                        <gIBSCBS>
+                            <vBC>23.60</vBC>
+                            <gIBSUF>
+                                <pIBSUF>0.1000</pIBSUF>
+                                <vIBSUF>0.02</vIBSUF>
+                            </gIBSUF>
+                            <gIBSMun>
+                                <pIBSMun>0.0000</pIBSMun>
+                                <vIBSMun>0.00</vIBSMun>
+                            </gIBSMun>
+                            <vIBS>0.02</vIBS>
+                            <gCBS>
+                                <pCBS>0.9000</pCBS>
+                                <vCBS>0.21</vCBS>
+                            </gCBS>
+                        </gIBSCBS>
+                    </IBSCBS>
+                </imposto>
+            </det>
+            <det nItem="25">
+                <prod>
+                    <cProd>ITE-007952</cProd>
+                    <cEAN>17898931140373</cEAN>
+                    <xProd>BATATA CHIPS ONDULADA 20 X 45G</xProd>
+                    <NCM>20052000</NCM>
+                    <CEST>0100700</CEST>
+                    <CFOP>6403</CFOP>
+                    <uCom>UND</uCom>
+                    <qCom>5.0000</qCom>
+                    <vUnCom>12.7500000000</vUnCom>
+                    <vProd>63.75</vProd>
+                    <cEANTrib>7898931140376</cEANTrib>
+                    <uTrib>UND</uTrib>
+                    <qTrib>5.0000</qTrib>
+                    <vUnTrib>12.7500000000</vUnTrib>
+                    <indTot>1</indTot>
+                </prod>
+                <imposto>
+                    <vTotTrib>8.29</vTotTrib>
+                    <ICMS>
+                        <ICMS60>
+                            <orig>0</orig>
+                            <CST>60</CST>
+                        </ICMS60>
+                    </ICMS>
+                    <PIS>
+                        <PISAliq>
+                            <CST>01</CST>
+                            <vBC>63.75</vBC>
+                            <pPIS>0.6500</pPIS>
+                            <vPIS>0.41</vPIS>
+                        </PISAliq>
+                    </PIS>
+                    <COFINS>
+                        <COFINSAliq>
+                            <CST>01</CST>
+                            <vBC>63.75</vBC>
+                            <pCOFINS>3.0000</pCOFINS>
+                            <vCOFINS>1.91</vCOFINS>
+                        </COFINSAliq>
+                    </COFINS>
+                    <IBSCBS>
+                        <CST>000</CST>
+                        <cClassTrib>000001</cClassTrib>
+                        <gIBSCBS>
+                            <vBC>61.43</vBC>
+                            <gIBSUF>
+                                <pIBSUF>0.1000</pIBSUF>
+                                <vIBSUF>0.06</vIBSUF>
+                            </gIBSUF>
+                            <gIBSMun>
+                                <pIBSMun>0.0000</pIBSMun>
+                                <vIBSMun>0.00</vIBSMun>
+                            </gIBSMun>
+                            <vIBS>0.06</vIBS>
+                            <gCBS>
+                                <pCBS>0.9000</pCBS>
+                                <vCBS>0.55</vCBS>
+                            </gCBS>
+                        </gIBSCBS>
+                    </IBSCBS>
+                </imposto>
+            </det>
+            <det nItem="26">
+                <prod>
+                    <cProd>ITE-001888</cProd>
+                    <cEAN>SEM GTIN</cEAN>
+                    <xProd>BATATA CHIPS ONDULADA SABOR CHURRASCO 20 X 45G</xProd>
+                    <NCM>20052000</NCM>
+                    <CEST>1703200</CEST>
+                    <CFOP>6403</CFOP>
+                    <uCom>CX</uCom>
+                    <qCom>250.0000</qCom>
+                    <vUnCom>0.7100000000</vUnCom>
+                    <vProd>177.50</vProd>
+                    <cEANTrib>SEM GTIN</cEANTrib>
+                    <uTrib>UND</uTrib>
+                    <qTrib>25.0000</qTrib>
+                    <vUnTrib>0.7100000000</vUnTrib>
+                    <indTot>1</indTot>
+                </prod>
+                <imposto>
+                    <vTotTrib>23.08</vTotTrib>
+                    <ICMS>
+                        <ICMS60>
+                            <orig>2</orig>
+                            <CST>60</CST>
+                        </ICMS60>
+                    </ICMS>
+                    <PIS>
+                        <PISAliq>
+                            <CST>01</CST>
+                            <vBC>17.75</vBC>
+                            <pPIS>0.6500</pPIS>
+                            <vPIS>0.12</vPIS>
+                        </PISAliq>
+                    </PIS>
+                    <COFINS>
+                        <COFINSAliq>
+                            <CST>01</CST>
+                            <vBC>17.75</vBC>
+                            <pCOFINS>3.0000</pCOFINS>
+                            <vCOFINS>0.53</vCOFINS>
+                        </COFINSAliq>
+                    </COFINS>
+                    <IBSCBS>
+                        <CST>000</CST>
+                        <cClassTrib>000001</cClassTrib>
+                        <gIBSCBS>
+                            <vBC>17.10</vBC>
+                            <gIBSUF>
+                                <pIBSUF>0.1000</pIBSUF>
+                                <vIBSUF>0.02</vIBSUF>
+                            </gIBSUF>
+                            <gIBSMun>
+                                <pIBSMun>0.0000</pIBSMun>
+                                <vIBSMun>0.00</vIBSMun>
+                            </gIBSMun>
+                            <vIBS>0.02</vIBS>
+                            <gCBS>
+                                <pCBS>0.9000</pCBS>
+                                <vCBS>0.15</vCBS>
+                            </gCBS>
+                        </gIBSCBS>
+                    </IBSCBS>
+                </imposto>
+            </det>
+            <det nItem="27">
+                <prod>
+                    <cProd>ITE-007673</cProd>
+                    <cEAN>SEM GTIN</cEAN>
+                    <xProd>BATATA CHIPS ONDULADA SABOR ORIGINAL 20X45G</xProd>
+                    <NCM>20052000</NCM>
+                    <CEST>1703200</CEST>
+                    <CFOP>6403</CFOP>
+                    <uCom>CX</uCom>
+                    <qCom>2.0000</qCom>
+                    <vUnCom>12.2500000000</vUnCom>
+                    <vProd>24.50</vProd>
+                    <cEANTrib>SEM GTIN</cEANTrib>
+                    <uTrib>UND</uTrib>
+                    <qTrib>2.0000</qTrib>
+                    <vUnTrib>12.2500000000</vUnTrib>
+                    <indTot>1</indTot>
+                </prod>
+                <imposto>
+                    <vTotTrib>3.19</vTotTrib>
+                    <ICMS>
+                        <ICMS60>
+                            <orig>0</orig>
+                            <CST>60</CST>
+                        </ICMS60>
+                    </ICMS>
+                    <PIS>
+                        <PISAliq>
+                            <CST>01</CST>
+                            <vBC>24.50</vBC>
+                            <pPIS>0.6500</pPIS>
+                            <vPIS>0.16</vPIS>
+                        </PISAliq>
+                    </PIS>
+                    <COFINS>
+                        <COFINSAliq>
+                            <CST>01</CST>
+                            <vBC>24.50</vBC>
+                            <pCOFINS>3.0000</pCOFINS>
+                            <vCOFINS>0.74</vCOFINS>
+                        </COFINSAliq>
+                    </COFINS>
+                    <IBSCBS>
+                        <CST>000</CST>
+                        <cClassTrib>000001</cClassTrib>
+                        <gIBSCBS>
+                            <vBC>23.60</vBC>
+                            <gIBSUF>
+                                <pIBSUF>0.1000</pIBSUF>
+                                <vIBSUF>0.02</vIBSUF>
+                            </gIBSUF>
+                            <gIBSMun>
+                                <pIBSMun>0.0000</pIBSMun>
+                                <vIBSMun>0.00</vIBSMun>
+                            </gIBSMun>
+                            <vIBS>0.02</vIBS>
+                            <gCBS>
+                                <pCBS>0.9000</pCBS>
+                                <vCBS>0.21</vCBS>
+                            </gCBS>
+                        </gIBSCBS>
+                    </IBSCBS>
+                </imposto>
+            </det>
+            <det nItem="28">
+                <prod>
+                    <cProd>ITE-007952</cProd>
+                    <cEAN>17898931140373</cEAN>
+                    <xProd>BATATA CHIPS ONDULADA 20 X 45G</xProd>
+                    <NCM>20052000</NCM>
+                    <CEST>0100700</CEST>
+                    <CFOP>6403</CFOP>
+                    <uCom>UND</uCom>
+                    <qCom>5.0000</qCom>
+                    <vUnCom>12.7500000000</vUnCom>
+                    <vProd>63.75</vProd>
+                    <cEANTrib>7898931140376</cEANTrib>
+                    <uTrib>UND</uTrib>
+                    <qTrib>5.0000</qTrib>
+                    <vUnTrib>12.7500000000</vUnTrib>
+                    <indTot>1</indTot>
+                </prod>
+                <imposto>
+                    <vTotTrib>8.29</vTotTrib>
+                    <ICMS>
+                        <ICMS60>
+                            <orig>0</orig>
+                            <CST>60</CST>
+                        </ICMS60>
+                    </ICMS>
+                    <PIS>
+                        <PISAliq>
+                            <CST>01</CST>
+                            <vBC>63.75</vBC>
+                            <pPIS>0.6500</pPIS>
+                            <vPIS>0.41</vPIS>
+                        </PISAliq>
+                    </PIS>
+                    <COFINS>
+                        <COFINSAliq>
+                            <CST>01</CST>
+                            <vBC>63.75</vBC>
+                            <pCOFINS>3.0000</pCOFINS>
+                            <vCOFINS>1.91</vCOFINS>
+                        </COFINSAliq>
+                    </COFINS>
+                    <IBSCBS>
+                        <CST>000</CST>
+                        <cClassTrib>000001</cClassTrib>
+                        <gIBSCBS>
+                            <vBC>61.43</vBC>
+                            <gIBSUF>
+                                <pIBSUF>0.1000</pIBSUF>
+                                <vIBSUF>0.06</vIBSUF>
+                            </gIBSUF>
+                            <gIBSMun>
+                                <pIBSMun>0.0000</pIBSMun>
+                                <vIBSMun>0.00</vIBSMun>
+                            </gIBSMun>
+                            <vIBS>0.06</vIBS>
+                            <gCBS>
+                                <pCBS>0.9000</pCBS>
+                                <vCBS>0.55</vCBS>
+                            </gCBS>
+                        </gIBSCBS>
+                    </IBSCBS>
+                </imposto>
+            </det>
+            <det nItem="29">
+                <prod>
+                    <cProd>ITE-001888</cProd>
+                    <cEAN>SEM GTIN</cEAN>
+                    <xProd>BATATA CHIPS ONDULADA SABOR CHURRASCO 20 X 45G</xProd>
+                    <NCM>20052000</NCM>
+                    <CEST>1703200</CEST>
+                    <CFOP>6403</CFOP>
+                    <uCom>CX</uCom>
+                    <qCom>250.0000</qCom>
+                    <vUnCom>0.7100000000</vUnCom>
+                    <vProd>177.50</vProd>
+                    <cEANTrib>SEM GTIN</cEANTrib>
+                    <uTrib>UND</uTrib>
+                    <qTrib>25.0000</qTrib>
+                    <vUnTrib>0.7100000000</vUnTrib>
+                    <indTot>1</indTot>
+                </prod>
+                <imposto>
+                    <vTotTrib>23.08</vTotTrib>
+                    <ICMS>
+                        <ICMS60>
+                            <orig>2</orig>
+                            <CST>60</CST>
+                        </ICMS60>
+                    </ICMS>
+                    <PIS>
+                        <PISAliq>
+                            <CST>01</CST>
+                            <vBC>17.75</vBC>
+                            <pPIS>0.6500</pPIS>
+                            <vPIS>0.12</vPIS>
+                        </PISAliq>
+                    </PIS>
+                    <COFINS>
+                        <COFINSAliq>
+                            <CST>01</CST>
+                            <vBC>17.75</vBC>
+                            <pCOFINS>3.0000</pCOFINS>
+                            <vCOFINS>0.53</vCOFINS>
+                        </COFINSAliq>
+                    </COFINS>
+                    <IBSCBS>
+                        <CST>000</CST>
+                        <cClassTrib>000001</cClassTrib>
+                        <gIBSCBS>
+                            <vBC>17.10</vBC>
+                            <gIBSUF>
+                                <pIBSUF>0.1000</pIBSUF>
+                                <vIBSUF>0.02</vIBSUF>
+                            </gIBSUF>
+                            <gIBSMun>
+                                <pIBSMun>0.0000</pIBSMun>
+                                <vIBSMun>0.00</vIBSMun>
+                            </gIBSMun>
+                            <vIBS>0.02</vIBS>
+                            <gCBS>
+                                <pCBS>0.9000</pCBS>
+                                <vCBS>0.15</vCBS>
+                            </gCBS>
+                        </gIBSCBS>
+                    </IBSCBS>
+                </imposto>
+            </det>
+            <det nItem="30">
+                <prod>
+                    <cProd>ITE-007673</cProd>
+                    <cEAN>SEM GTIN</cEAN>
+                    <xProd>BATATA CHIPS ONDULADA SABOR ORIGINAL 20X45G</xProd>
+                    <NCM>20052000</NCM>
+                    <CEST>1703200</CEST>
+                    <CFOP>6403</CFOP>
+                    <uCom>CX</uCom>
+                    <qCom>2.0000</qCom>
+                    <vUnCom>12.2500000000</vUnCom>
+                    <vProd>24.50</vProd>
+                    <cEANTrib>SEM GTIN</cEANTrib>
+                    <uTrib>UND</uTrib>
+                    <qTrib>2.0000</qTrib>
+                    <vUnTrib>12.2500000000</vUnTrib>
+                    <indTot>1</indTot>
+                </prod>
+                <imposto>
+                    <vTotTrib>3.19</vTotTrib>
+                    <ICMS>
+                        <ICMS60>
+                            <orig>0</orig>
+                            <CST>60</CST>
+                        </ICMS60>
+                    </ICMS>
+                    <PIS>
+                        <PISAliq>
+                            <CST>01</CST>
+                            <vBC>24.50</vBC>
+                            <pPIS>0.6500</pPIS>
+                            <vPIS>0.16</vPIS>
+                        </PISAliq>
+                    </PIS>
+                    <COFINS>
+                        <COFINSAliq>
+                            <CST>01</CST>
+                            <vBC>24.50</vBC>
+                            <pCOFINS>3.0000</pCOFINS>
+                            <vCOFINS>0.74</vCOFINS>
+                        </COFINSAliq>
+                    </COFINS>
+                    <IBSCBS>
+                        <CST>000</CST>
+                        <cClassTrib>000001</cClassTrib>
+                        <gIBSCBS>
+                            <vBC>23.60</vBC>
+                            <gIBSUF>
+                                <pIBSUF>0.1000</pIBSUF>
+                                <vIBSUF>0.02</vIBSUF>
+                            </gIBSUF>
+                            <gIBSMun>
+                                <pIBSMun>0.0000</pIBSMun>
+                                <vIBSMun>0.00</vIBSMun>
+                            </gIBSMun>
+                            <vIBS>0.02</vIBS>
+                            <gCBS>
+                                <pCBS>0.9000</pCBS>
+                                <vCBS>0.21</vCBS>
+                            </gCBS>
+                        </gIBSCBS>
+                    </IBSCBS>
+                </imposto>
+            </det>
+            <det nItem="31">
+                <prod>
+                    <cProd>ITE-007952</cProd>
+                    <cEAN>17898931140373</cEAN>
+                    <xProd>BATATA CHIPS ONDULADA 20 X 45G</xProd>
+                    <NCM>20052000</NCM>
+                    <CEST>0100700</CEST>
+                    <CFOP>6403</CFOP>
+                    <uCom>UND</uCom>
+                    <qCom>5.0000</qCom>
+                    <vUnCom>12.7500000000</vUnCom>
+                    <vProd>63.75</vProd>
+                    <cEANTrib>7898931140376</cEANTrib>
+                    <uTrib>UND</uTrib>
+                    <qTrib>5.0000</qTrib>
+                    <vUnTrib>12.7500000000</vUnTrib>
+                    <indTot>1</indTot>
+                </prod>
+                <imposto>
+                    <vTotTrib>8.29</vTotTrib>
+                    <ICMS>
+                        <ICMS60>
+                            <orig>0</orig>
+                            <CST>60</CST>
+                        </ICMS60>
+                    </ICMS>
+                    <PIS>
+                        <PISAliq>
+                            <CST>01</CST>
+                            <vBC>63.75</vBC>
+                            <pPIS>0.6500</pPIS>
+                            <vPIS>0.41</vPIS>
+                        </PISAliq>
+                    </PIS>
+                    <COFINS>
+                        <COFINSAliq>
+                            <CST>01</CST>
+                            <vBC>63.75</vBC>
+                            <pCOFINS>3.0000</pCOFINS>
+                            <vCOFINS>1.91</vCOFINS>
+                        </COFINSAliq>
+                    </COFINS>
+                    <IBSCBS>
+                        <CST>000</CST>
+                        <cClassTrib>000001</cClassTrib>
+                        <gIBSCBS>
+                            <vBC>61.43</vBC>
+                            <gIBSUF>
+                                <pIBSUF>0.1000</pIBSUF>
+                                <vIBSUF>0.06</vIBSUF>
+                            </gIBSUF>
+                            <gIBSMun>
+                                <pIBSMun>0.0000</pIBSMun>
+                                <vIBSMun>0.00</vIBSMun>
+                            </gIBSMun>
+                            <vIBS>0.06</vIBS>
+                            <gCBS>
+                                <pCBS>0.9000</pCBS>
+                                <vCBS>0.55</vCBS>
+                            </gCBS>
+                        </gIBSCBS>
+                    </IBSCBS>
+                </imposto>
+            </det>
+            <det nItem="32">
+                <prod>
+                    <cProd>ITE-001888</cProd>
+                    <cEAN>SEM GTIN</cEAN>
+                    <xProd>BATATA CHIPS ONDULADA SABOR CHURRASCO 20 X 45G</xProd>
+                    <NCM>20052000</NCM>
+                    <CEST>1703200</CEST>
+                    <CFOP>6403</CFOP>
+                    <uCom>CX</uCom>
+                    <qCom>250.0000</qCom>
+                    <vUnCom>0.7100000000</vUnCom>
+                    <vProd>177.50</vProd>
+                    <cEANTrib>SEM GTIN</cEANTrib>
+                    <uTrib>UND</uTrib>
+                    <qTrib>25.0000</qTrib>
+                    <vUnTrib>0.7100000000</vUnTrib>
+                    <indTot>1</indTot>
+                </prod>
+                <imposto>
+                    <vTotTrib>23.08</vTotTrib>
+                    <ICMS>
+                        <ICMS60>
+                            <orig>2</orig>
+                            <CST>60</CST>
+                        </ICMS60>
+                    </ICMS>
+                    <PIS>
+                        <PISAliq>
+                            <CST>01</CST>
+                            <vBC>17.75</vBC>
+                            <pPIS>0.6500</pPIS>
+                            <vPIS>0.12</vPIS>
+                        </PISAliq>
+                    </PIS>
+                    <COFINS>
+                        <COFINSAliq>
+                            <CST>01</CST>
+                            <vBC>17.75</vBC>
+                            <pCOFINS>3.0000</pCOFINS>
+                            <vCOFINS>0.53</vCOFINS>
+                        </COFINSAliq>
+                    </COFINS>
+                    <IBSCBS>
+                        <CST>000</CST>
+                        <cClassTrib>000001</cClassTrib>
+                        <gIBSCBS>
+                            <vBC>17.10</vBC>
+                            <gIBSUF>
+                                <pIBSUF>0.1000</pIBSUF>
+                                <vIBSUF>0.02</vIBSUF>
+                            </gIBSUF>
+                            <gIBSMun>
+                                <pIBSMun>0.0000</pIBSMun>
+                                <vIBSMun>0.00</vIBSMun>
+                            </gIBSMun>
+                            <vIBS>0.02</vIBS>
+                            <gCBS>
+                                <pCBS>0.9000</pCBS>
+                                <vCBS>0.15</vCBS>
+                            </gCBS>
+                        </gIBSCBS>
+                    </IBSCBS>
+                </imposto>
+            </det>
+            <det nItem="33">
+                <prod>
+                    <cProd>ITE-007673</cProd>
+                    <cEAN>SEM GTIN</cEAN>
+                    <xProd>BATATA CHIPS ONDULADA SABOR ORIGINAL 20X45G</xProd>
+                    <NCM>20052000</NCM>
+                    <CEST>1703200</CEST>
+                    <CFOP>6403</CFOP>
+                    <uCom>CX</uCom>
+                    <qCom>2.0000</qCom>
+                    <vUnCom>12.2500000000</vUnCom>
+                    <vProd>24.50</vProd>
+                    <cEANTrib>SEM GTIN</cEANTrib>
+                    <uTrib>UND</uTrib>
+                    <qTrib>2.0000</qTrib>
+                    <vUnTrib>12.2500000000</vUnTrib>
+                    <indTot>1</indTot>
+                </prod>
+                <imposto>
+                    <vTotTrib>3.19</vTotTrib>
+                    <ICMS>
+                        <ICMS60>
+                            <orig>0</orig>
+                            <CST>60</CST>
+                        </ICMS60>
+                    </ICMS>
+                    <PIS>
+                        <PISAliq>
+                            <CST>01</CST>
+                            <vBC>24.50</vBC>
+                            <pPIS>0.6500</pPIS>
+                            <vPIS>0.16</vPIS>
+                        </PISAliq>
+                    </PIS>
+                    <COFINS>
+                        <COFINSAliq>
+                            <CST>01</CST>
+                            <vBC>24.50</vBC>
+                            <pCOFINS>3.0000</pCOFINS>
+                            <vCOFINS>0.74</vCOFINS>
+                        </COFINSAliq>
+                    </COFINS>
+                    <IBSCBS>
+                        <CST>000</CST>
+                        <cClassTrib>000001</cClassTrib>
+                        <gIBSCBS>
+                            <vBC>23.60</vBC>
+                            <gIBSUF>
+                                <pIBSUF>0.1000</pIBSUF>
+                                <vIBSUF>0.02</vIBSUF>
+                            </gIBSUF>
+                            <gIBSMun>
+                                <pIBSMun>0.0000</pIBSMun>
+                                <vIBSMun>0.00</vIBSMun>
+                            </gIBSMun>
+                            <vIBS>0.02</vIBS>
+                            <gCBS>
+                                <pCBS>0.9000</pCBS>
+                                <vCBS>0.21</vCBS>
+                            </gCBS>
+                        </gIBSCBS>
+                    </IBSCBS>
+                </imposto>
+            </det>
+            <det nItem="34">
+                <prod>
+                    <cProd>ITE-007952</cProd>
+                    <cEAN>17898931140373</cEAN>
+                    <xProd>BATATA CHIPS ONDULADA 20 X 45G</xProd>
+                    <NCM>20052000</NCM>
+                    <CEST>0100700</CEST>
+                    <CFOP>6403</CFOP>
+                    <uCom>UND</uCom>
+                    <qCom>5.0000</qCom>
+                    <vUnCom>12.7500000000</vUnCom>
+                    <vProd>63.75</vProd>
+                    <cEANTrib>7898931140376</cEANTrib>
+                    <uTrib>UND</uTrib>
+                    <qTrib>5.0000</qTrib>
+                    <vUnTrib>12.7500000000</vUnTrib>
+                    <indTot>1</indTot>
+                </prod>
+                <imposto>
+                    <vTotTrib>8.29</vTotTrib>
+                    <ICMS>
+                        <ICMS60>
+                            <orig>0</orig>
+                            <CST>60</CST>
+                        </ICMS60>
+                    </ICMS>
+                    <PIS>
+                        <PISAliq>
+                            <CST>01</CST>
+                            <vBC>63.75</vBC>
+                            <pPIS>0.6500</pPIS>
+                            <vPIS>0.41</vPIS>
+                        </PISAliq>
+                    </PIS>
+                    <COFINS>
+                        <COFINSAliq>
+                            <CST>01</CST>
+                            <vBC>63.75</vBC>
+                            <pCOFINS>3.0000</pCOFINS>
+                            <vCOFINS>1.91</vCOFINS>
+                        </COFINSAliq>
+                    </COFINS>
+                    <IBSCBS>
+                        <CST>000</CST>
+                        <cClassTrib>000001</cClassTrib>
+                        <gIBSCBS>
+                            <vBC>61.43</vBC>
+                            <gIBSUF>
+                                <pIBSUF>0.1000</pIBSUF>
+                                <vIBSUF>0.06</vIBSUF>
+                            </gIBSUF>
+                            <gIBSMun>
+                                <pIBSMun>0.0000</pIBSMun>
+                                <vIBSMun>0.00</vIBSMun>
+                            </gIBSMun>
+                            <vIBS>0.06</vIBS>
+                            <gCBS>
+                                <pCBS>0.9000</pCBS>
+                                <vCBS>0.55</vCBS>
+                            </gCBS>
+                        </gIBSCBS>
+                    </IBSCBS>
+                </imposto>
+            </det>
+            <det nItem="35">
+                <prod>
+                    <cProd>ITE-001888</cProd>
+                    <cEAN>SEM GTIN</cEAN>
+                    <xProd>BATATA CHIPS ONDULADA SABOR CHURRASCO 20 X 45G</xProd>
+                    <NCM>20052000</NCM>
+                    <CEST>1703200</CEST>
+                    <CFOP>6403</CFOP>
+                    <uCom>CX</uCom>
+                    <qCom>250.0000</qCom>
+                    <vUnCom>0.7100000000</vUnCom>
+                    <vProd>177.50</vProd>
+                    <cEANTrib>SEM GTIN</cEANTrib>
+                    <uTrib>UND</uTrib>
+                    <qTrib>25.0000</qTrib>
+                    <vUnTrib>0.7100000000</vUnTrib>
+                    <indTot>1</indTot>
+                </prod>
+                <imposto>
+                    <vTotTrib>23.08</vTotTrib>
+                    <ICMS>
+                        <ICMS60>
+                            <orig>2</orig>
+                            <CST>60</CST>
+                        </ICMS60>
+                    </ICMS>
+                    <PIS>
+                        <PISAliq>
+                            <CST>01</CST>
+                            <vBC>17.75</vBC>
+                            <pPIS>0.6500</pPIS>
+                            <vPIS>0.12</vPIS>
+                        </PISAliq>
+                    </PIS>
+                    <COFINS>
+                        <COFINSAliq>
+                            <CST>01</CST>
+                            <vBC>17.75</vBC>
+                            <pCOFINS>3.0000</pCOFINS>
+                            <vCOFINS>0.53</vCOFINS>
+                        </COFINSAliq>
+                    </COFINS>
+                    <IBSCBS>
+                        <CST>000</CST>
+                        <cClassTrib>000001</cClassTrib>
+                        <gIBSCBS>
+                            <vBC>17.10</vBC>
+                            <gIBSUF>
+                                <pIBSUF>0.1000</pIBSUF>
+                                <vIBSUF>0.02</vIBSUF>
+                            </gIBSUF>
+                            <gIBSMun>
+                                <pIBSMun>0.0000</pIBSMun>
+                                <vIBSMun>0.00</vIBSMun>
+                            </gIBSMun>
+                            <vIBS>0.02</vIBS>
+                            <gCBS>
+                                <pCBS>0.9000</pCBS>
+                                <vCBS>0.15</vCBS>
+                            </gCBS>
+                        </gIBSCBS>
+                    </IBSCBS>
+                </imposto>
+            </det>
+            <det nItem="36">
+                <prod>
+                    <cProd>ITE-007673</cProd>
+                    <cEAN>SEM GTIN</cEAN>
+                    <xProd>BATATA CHIPS ONDULADA SABOR ORIGINAL 20X45G</xProd>
+                    <NCM>20052000</NCM>
+                    <CEST>1703200</CEST>
+                    <CFOP>6403</CFOP>
+                    <uCom>CX</uCom>
+                    <qCom>2.0000</qCom>
+                    <vUnCom>12.2500000000</vUnCom>
+                    <vProd>24.50</vProd>
+                    <cEANTrib>SEM GTIN</cEANTrib>
+                    <uTrib>UND</uTrib>
+                    <qTrib>2.0000</qTrib>
+                    <vUnTrib>12.2500000000</vUnTrib>
+                    <indTot>1</indTot>
+                </prod>
+                <imposto>
+                    <vTotTrib>3.19</vTotTrib>
                     <ICMS>
                         <ICMS60>
                             <orig>0</orig>
@@ -1599,8 +2367,8 @@
             </det>
             <total>
                 <ICMSTot>
-                    <vBC>953.36</vBC>
-                    <vICMS>171.60</vICMS>
+                    <vBC>11440.32</vBC>
+                    <vICMS>2059.20</vICMS>
                     <vICMSDeson>0.00</vICMSDeson>
                     <vFCPUFDest>0.00</vFCPUFDest>
                     <vICMSUFDest>0.00</vICMSUFDest>
@@ -1610,17 +2378,17 @@
                     <vST>0.00</vST>
                     <vFCPST>0.00</vFCPST>
                     <vFCPSTRet>0.00</vFCPSTRet>
-                    <vProd>265.75</vProd>
+                    <vProd>3189.00</vProd>
                     <vFrete>10.00</vFrete>
                     <vSeg>5.00</vSeg>
                     <vDesc>0.00</vDesc>
                     <vII>0.00</vII>
                     <vIPI>0.00</vIPI>
                     <vIPIDevol>0.00</vIPIDevol>
-                    <vPIS>12.68</vPIS>
-                    <vCOFINS>5.71</vCOFINS>
+                    <vPIS>152.16</vPIS>
+                    <vCOFINS>68.52</vCOFINS>
                     <vOutro>0.00</vOutro>
-                    <vNF>280.75</vNF>
+                    <vNF>3204.00</vNF>
                 </ICMSTot>
                 <IBSCBSTot>
                     <vBCIBSCBS>183.05</vBCIBSCBS>
@@ -1654,13 +2422,13 @@
             <pag>
                 <detPag>
                     <indPag>0</indPag>
-                    <tPag>01</tPag>
-                    <vPag>300.00</vPag>
+                    <tPag>04</tPag>
+                    <vPag>3250.00</vPag>
                     <card>
                         <tpIntegra>2</tpIntegra>
                     </card>
                 </detPag>
-                <vTroco>19.250</vTroco>
+                <vTroco>46.00</vTroco>
             </pag>
             <infAdic />
         </infNFe>

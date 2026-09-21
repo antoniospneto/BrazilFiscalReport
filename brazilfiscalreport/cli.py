@@ -173,7 +173,7 @@ def generate_danfse(xml):
 @cli.command("danfce")
 @click.argument("xml", type=click.Path(exists=True))
 def generate_danfce(xml):
-    _generate_document("danfce", "DANFCE", xml, _build_danfce)
+    _generate_document("danfce", "DANFCe", xml, _build_danfce)
 
 
 if __name__ == "__main__":

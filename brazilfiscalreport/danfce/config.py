@@ -38,6 +38,7 @@ class DanfceConfig:
     # Largura da bobina em mm. 80 e 58 são os formatos usuais das
     # impressoras térmicas não fiscais.
     paper_width: Number = 80
-    # Altura da "folha" enviada à impressora. Como a bobina é contínua, o
-    # valor só define onde o cupom quebra em páginas.
-    paper_height: Number = 300
+    # Altura da página. O padrão (None) gera uma página única com a altura
+    # exata do conteúdo, que é como a bobina contínua funciona. Fixar um
+    # valor volta a quebrar o cupom em páginas desse tamanho.
+    paper_height: Number | None = None

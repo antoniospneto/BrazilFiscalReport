@@ -35,7 +35,9 @@ pip install 'brazilfiscalreport[danfce]'
 
 This section describes how to customize the PDF output of the DANFCe using the `DanfceConfig` class.
 
-### Paper width
+### Paper size
+
+A thermal roll is continuous, so by default the DANFCe is **a single page as tall as its content** — there is no "page 2 of 2" on a receipt.
 
 The default roll is 80 mm wide. For 58 mm printers, set `paper_width`; the item columns are measured from their contents, so they adapt to the narrower roll:
 
@@ -48,7 +50,13 @@ danfce = Danfce(xml=xml_content, config=config)
 danfce.output('output_danfce.pdf')
 ```
 
-`paper_height` (default 300 mm) only decides where the receipt breaks into pages — the roll itself is continuous.
+Setting `paper_height` opts out and breaks the receipt into pages of that height instead:
+
+```python
+config = DanfceConfig(paper_height=300)
+```
+
+This also happens automatically when the content would exceed the PDF page limit of 200 inches (5080 mm) — an NFC-e accepts up to 990 items, which is several metres of roll.
 
 ### Margins
 
@@ -92,4 +100,4 @@ config = DanfceConfig(
 - The approximate taxes (Lei nº 12.741/2012) come from `ICMSTot/vTotTrib`, falling back to the sum of `det/imposto/vTotTrib` when the total is absent.
 - The consumer is identified by `CPF`, `CNPJ` or `idEstrangeiro`; without any of them the document prints "CONSUMIDOR NÃO IDENTIFICADO".
 - `infAdic/infCpl` is printed as the taxpayer's message, between the taxes line and the access key.
-- When the item list spills over a page, the column header is repeated on the new page.
+- In the paginated fallback, the column header is repeated whenever the item list spills over a page.

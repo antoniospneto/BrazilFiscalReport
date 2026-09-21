@@ -3,13 +3,28 @@ import re
 import pytest
 
 from brazilfiscalreport.danfce import Danfce, DanfceConfig, Margins
-from brazilfiscalreport.danfce.danfce import ITEM_CODE_WIDTH
+from brazilfiscalreport.danfce.danfce import (
+    ITEM_CODE_WIDTH,
+    MAX_PAGE_HEIGHT,
+    PAGINATED_PAGE_HEIGHT,
+)
 from brazilfiscalreport.danfce.danfce_conf import (
     CONTINGENCY_NOTICE,
     HOMOLOGATION_NOTICE,
     PENDING_AUTH_NOTICE,
 )
 from tests.conftest import assert_pdf_equal, get_pdf_output_path
+
+
+def _with_repeated_items(xml, count):
+    """Repete o primeiro <det> da fixture `count` vezes, renumerando nItem."""
+    match = re.search(r'(<det nItem="1">.*?</det>)', xml, re.S)
+    det = match.group(1)
+    dets = "".join(
+        re.sub(r'<det nItem="\d+">', f'<det nItem="{i + 1}">', det)
+        for i in range(count)
+    )
+    return xml[: match.start(1)] + dets + xml[match.end(1) :]
 
 
 @pytest.fixture
@@ -57,9 +72,16 @@ def test_danfce_narrow_paper(tmp_path, load_danfce):
     assert_pdf_equal(danfce, pdf_path, tmp_path)
 
 
-def test_danfce_multi_page(tmp_path, load_danfce):
-    danfce = load_danfce("danfce_multi_page.xml")
-    pdf_path = get_pdf_output_path("danfce", "danfce_multi_page")
+def test_danfce_many_items(tmp_path, load_danfce):
+    danfce = load_danfce("danfce_many_items.xml")
+    pdf_path = get_pdf_output_path("danfce", "danfce_many_items")
+    assert_pdf_equal(danfce, pdf_path, tmp_path)
+
+
+def test_danfce_paginated(tmp_path, load_danfce):
+    config = DanfceConfig(paper_height=PAGINATED_PAGE_HEIGHT)
+    danfce = load_danfce("danfce_many_items.xml", config=config)
+    pdf_path = get_pdf_output_path("danfce", "danfce_paginated")
     assert_pdf_equal(danfce, pdf_path, tmp_path)
 
 
@@ -75,20 +97,55 @@ def test_danfce_long_fields(tmp_path, load_danfce):
     assert_pdf_equal(danfce, pdf_path, tmp_path)
 
 
-# --- Paginação do bloco de itens ---
+# --- Altura da bobina ---
 
 
-def test_danfce_multi_page_breaks_inside_item_list(load_danfce):
+@pytest.mark.parametrize(
+    "fixture",
+    ["danfce_default.xml", "danfce_many_items.xml", "danfce_sem_valor_fiscal.xml"],
+)
+def test_danfce_is_a_single_page_sized_to_content(load_danfce, fixture):
     """
-    O bloco de itens é desenhado em coordenadas absolutas. Antes da reserva
-    de espaço, um item que cruzasse a quebra de página fazia cada célula
-    abrir uma página nova (36 itens chegavam a 10 páginas).
+    Bobina térmica é contínua: o cupom tem a altura do que foi impresso.
+    Não existe "página 2 de 2" num cupom.
     """
-    danfce = load_danfce("danfce_multi_page.xml")
+    danfce = load_danfce(fixture)
+    assert danfce.continuous
+    assert len(danfce.pages) == 1
+    # O conteúdo termina exatamente na margem inferior, sem sobra de bobina.
+    assert danfce.get_y() + danfce.b_margin == pytest.approx(danfce.h)
+
+
+def test_danfce_fixed_paper_height_paginates(load_danfce):
+    """Fixar `paper_height` volta a quebrar o cupom em páginas."""
+    danfce = load_danfce("danfce_many_items.xml", config=DanfceConfig(paper_height=300))
+    assert not danfce.continuous
+    assert danfce.h == 300
     assert len(danfce.pages) == 2
 
 
+def test_danfce_falls_back_to_pages_when_longer_than_pdf_limit(load_xml):
+    """
+    Uma NFC-e aceita até 990 itens, o que passa do limite de página do PDF
+    (200 polegadas). Nesse caso não há bobina única possível.
+    """
+    xml = _with_repeated_items(load_xml("danfce/danfce_default.xml"), 990)
+    danfce = Danfce(xml=xml)
+
+    assert not danfce.continuous
+    assert danfce.h == PAGINATED_PAGE_HEIGHT
+    assert len(danfce.pages) * danfce.h > MAX_PAGE_HEIGHT
+
+
+# --- Paginação do bloco de itens (caminho de exceção) ---
+
+
 def test_danfce_repeats_item_header_after_page_break(load_xml, monkeypatch):
+    """
+    O bloco de itens é desenhado em coordenadas absolutas. Sem a reserva de
+    espaço, um item que cruzasse a quebra fazia cada célula abrir uma página
+    nova (36 itens chegavam a 10 páginas).
+    """
     calls = []
     original = Danfce._draw_items_header
 
@@ -97,7 +154,10 @@ def test_danfce_repeats_item_header_after_page_break(load_xml, monkeypatch):
         return original(self)
 
     monkeypatch.setattr(Danfce, "_draw_items_header", spy)
-    Danfce(xml=load_xml("danfce/danfce_multi_page.xml"))
+    Danfce(
+        xml=load_xml("danfce/danfce_many_items.xml"),
+        config=DanfceConfig(paper_height=300),
+    )
 
     assert calls == [1, 2], "cabeçalho de colunas deve ser repetido na página nova"
 
@@ -128,7 +188,7 @@ def to_float(value):
     [
         "danfce_default.xml",
         "danfce_without_consumer.xml",
-        "danfce_multi_page.xml",
+        "danfce_many_items.xml",
     ],
 )
 def test_danfce_totals_add_up(load_danfce, fixture):

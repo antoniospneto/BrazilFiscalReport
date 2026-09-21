@@ -34,6 +34,11 @@ ITEM_CODE_WIDTH = 17
 ITEM_OPERATOR_WIDTH = 4
 # Lado do QR Code, em mm.
 QR_CODE_SIZE = 36
+# Limite clássico de página do PDF (200 polegadas). O fpdf2 não o valida,
+# mas os leitores tratam mal o que passa disso.
+MAX_PAGE_HEIGHT = 5080
+# Altura de página usada quando o cupom não cabe numa bobina única.
+PAGINATED_PAGE_HEIGHT = 300
 
 
 def extract_text(node: Element | None, tag: str) -> str:
@@ -45,18 +50,20 @@ def extract_text(node: Element | None, tag: str) -> str:
 
 
 class Danfce(xFPDF):
-    def __init__(self, xml, config: DanfceConfig | None = None):
+    def __init__(self, xml, config: DanfceConfig | None = None, _probe_height=None):
         self.config = config if config is not None else DanfceConfig()
-        super().__init__(
-            unit="mm",
-            format=(self.config.paper_width, self.config.paper_height),
-        )
+        page_height = self._resolve_page_height(xml, _probe_height)
+
+        super().__init__(unit="mm", format=(self.config.paper_width, page_height))
         self.set_margins(
             left=self.config.margins.left,
             top=self.config.margins.top,
             right=self.config.margins.right,
         )
-        self.set_auto_page_break(auto=True, margin=self.config.margins.bottom)
+        # Numa bobina contínua não existe página seguinte para onde quebrar.
+        self.set_auto_page_break(
+            auto=not self.continuous, margin=self.config.margins.bottom
+        )
         self.set_title("DANFCe")
         self.default_font = self.config.font_type.value
         self.price_precision = self.config.decimal_config.price_precision
@@ -71,6 +78,40 @@ class Danfce(xFPDF):
         self._draw_payments()
         self._draw_additional_info()
         self._draw_footer()
+
+    # --- Altura da bobina ---
+
+    def _resolve_page_height(self, xml, probe_height):
+        """
+        Decide a altura da página e se o cupom quebra em páginas.
+
+        Uma bobina térmica é contínua: o cupom tem o tamanho do que foi
+        impresso e é cortado no fim. O padrão, então, é uma página única
+        com a altura exata do conteúdo, medida numa primeira passagem —
+        mesma solução do DANFCe do ACBr (`EndlessHeight` + `DoublePass`).
+
+        Só há duas exceções: quando o chamador fixa `paper_height`, e
+        quando o conteúdo passa do limite de página do PDF (uma NFC-e
+        aceita até 990 itens, o que daria metros de bobina).
+        """
+        if probe_height is not None:
+            self.continuous = True
+            return probe_height
+
+        if self.config.paper_height is not None:
+            self.continuous = False
+            return self.config.paper_height
+
+        probe = type(self)(xml, self.config, _probe_height=MAX_PAGE_HEIGHT)
+        height = probe.get_y() + probe.b_margin
+        self.continuous = height <= MAX_PAGE_HEIGHT
+        return height if self.continuous else PAGINATED_PAGE_HEIGHT
+
+    def ensure_space(self, height):
+        # Sem página seguinte, não há o que reservar.
+        if self.continuous:
+            return False
+        return super().ensure_space(height)
 
     # --- Leitura do XML ---
 

@@ -35,7 +35,9 @@ pip install 'brazilfiscalreport[danfce]'
 
 Esta seção descreve como personalizar a saída em PDF do DANFCe usando a classe `DanfceConfig`.
 
-### Largura da bobina
+### Tamanho da bobina
+
+A bobina térmica é contínua, então por padrão o DANFCe sai em **uma página só, com a altura do conteúdo** — não existe "página 2 de 2" num cupom.
 
 A bobina padrão tem 80 mm. Para impressoras de 58 mm, ajuste `paper_width`; as colunas dos itens são medidas pelo conteúdo, então se acomodam à bobina menor:
 
@@ -48,7 +50,13 @@ danfce = Danfce(xml=xml_content, config=config)
 danfce.output('output_danfce.pdf')
 ```
 
-O `paper_height` (padrão 300 mm) só define onde o cupom quebra em páginas — a bobina em si é contínua.
+Informar `paper_height` abre mão disso e quebra o cupom em páginas dessa altura:
+
+```python
+config = DanfceConfig(paper_height=300)
+```
+
+Isso também acontece sozinho quando o conteúdo passaria do limite de página do PDF, de 200 polegadas (5080 mm) — uma NFC-e aceita até 990 itens, o que daria metros de bobina.
 
 ### Margens
 
@@ -92,4 +100,4 @@ config = DanfceConfig(
 - Os tributos aproximados (Lei nº 12.741/2012) vêm de `ICMSTot/vTotTrib`, com fallback para a soma de `det/imposto/vTotTrib` quando o total não vem informado.
 - O consumidor é identificado por `CPF`, `CNPJ` ou `idEstrangeiro`; sem nenhum deles o documento imprime "CONSUMIDOR NÃO IDENTIFICADO".
 - O `infAdic/infCpl` é impresso como mensagem de interesse do contribuinte, entre a linha de tributos e a chave de acesso.
-- Quando a lista de itens passa para outra página, o cabeçalho de colunas é repetido.
+- No fallback paginado, o cabeçalho de colunas é repetido sempre que a lista de itens passa para outra página.

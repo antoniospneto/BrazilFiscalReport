@@ -893,8 +893,9 @@ class Danfse(xFPDF):
         height = font_size * 0.25
         x_center = (self.w - width) / 2
         y_center = (self.h + height) / 2
-        with self.local_context(fill_opacity=0.35), self.rotation(
-            55, x_center + (width / 2), y_center - (height / 2)
+        with (
+            self.local_context(fill_opacity=0.35),
+            self.rotation(55, x_center + (width / 2), y_center - (height / 2)),
         ):
             self.text(x_center, y_center, watermark_text)
 

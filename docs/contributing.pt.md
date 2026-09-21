@@ -4,7 +4,7 @@ Contribuições são bem-vindas! Veja como configurar o projeto para desenvolvim
 
 ## Configuração do Ambiente de Desenvolvimento
 
-A biblioteca suporta Python 3.8+ (o CI testa do 3.8 ao 3.13), então mantenha o código compatível com 3.8.
+A biblioteca suporta Python 3.10+ (o CI testa do 3.10 ao 3.14), então mantenha o código compatível com 3.10.
 
 1. Clone o repositório:
 

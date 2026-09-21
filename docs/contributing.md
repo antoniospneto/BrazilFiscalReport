@@ -4,7 +4,7 @@ Contributions are welcome! Here's how to set up the project for development.
 
 ## Development Setup
 
-The library supports Python 3.8+ (the CI tests 3.8 through 3.13), so keep the code compatible with 3.8.
+The library supports Python 3.10+ (the CI tests 3.10 through 3.14), so keep the code compatible with 3.10.
 
 1. Clone the repository:
 

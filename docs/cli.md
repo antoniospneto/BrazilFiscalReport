@@ -85,7 +85,7 @@ Each setting applies to a different set of commands:
 | Setting | Applies to |
 |---------|------------|
 | `ISSUER` | `dacce` only |
-| `LOGO` | `danfe`, `dacte`, `damdfe` |
+| `LOGO` | `danfe`, `dacte`, `damdfe`, `danfce` |
 | `TOP/RIGHT/BOTTOM/LEFT_MARGIN` | `danfe`, `dacte`, `damdfe`, `danfse`, `danfce` |
 
 If no `config.yaml` is found, default values are used. If the `LOGO` path does not exist, it is ignored with a console warning and the document is generated without a logo.

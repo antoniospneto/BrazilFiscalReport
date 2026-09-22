@@ -7,11 +7,13 @@ from brazilfiscalreport.danfce.danfce import (
     ITEM_CODE_WIDTH,
     MAX_PAGE_HEIGHT,
     PAGINATED_PAGE_HEIGHT,
+    QR_CODE_RATIO,
 )
 from brazilfiscalreport.danfce.danfce_conf import (
     CONTINGENCY_NOTICE,
     HOMOLOGATION_NOTICE,
     PENDING_AUTH_NOTICE,
+    UNREPORTED_TAX,
 )
 from tests.conftest import assert_pdf_equal, get_pdf_output_path
 
@@ -291,3 +293,66 @@ def test_danfce_split_rows_are_not_truncated(load_xml, paper_width, monkeypatch)
 
     values = [item for item in truncated if item[0] != item[1]]
     assert values == [], f"valores cortados: {values}"
+
+
+# --- Opções trazidas do DANFCe do ACBr ---
+
+
+def test_danfce_with_logo(tmp_path, load_danfce, logo_path):
+    config = DanfceConfig(logo=logo_path)
+    danfce = load_danfce("danfce_default.xml", config=config)
+    pdf_path = get_pdf_output_path("danfce", "danfce_logo")
+    assert_pdf_equal(danfce, pdf_path, tmp_path)
+
+
+def test_danfce_cancelled_watermark(tmp_path, load_danfce):
+    config = DanfceConfig(watermark_cancelled=True)
+    danfce = load_danfce("danfce_default.xml", config=config)
+    pdf_path = get_pdf_output_path("danfce", "danfce_cancelled")
+    assert_pdf_equal(danfce, pdf_path, tmp_path)
+
+
+def test_danfce_unreported_tax_is_not_printed_as_zero(load_xml):
+    """
+    vTotTrib zerado quer dizer "não informado". Imprimir 0,00 afirmaria que
+    não há tributo, que é coisa diferente.
+    """
+    xml = re.sub(
+        r"<vTotTrib>[^<]*</vTotTrib>",
+        "<vTotTrib>0.00</vTotTrib>",
+        load_xml("danfce/danfce_default.xml"),
+    )
+    assert Danfce(xml=xml).data["totals"]["taxes"] == UNREPORTED_TAX
+
+
+def test_danfce_line_break_char_splits_additional_info(load_xml):
+    """Emitente costuma separar as linhas do infCpl com ';' ou '|'."""
+    xml = load_xml("danfce/danfce_default.xml").replace(
+        "</pag>",
+        "</pag>\n<infAdic><infCpl>Primeira;Segunda;Terceira</infCpl></infAdic>",
+    )
+    config = DanfceConfig(line_break_char=";")
+    assert Danfce(xml=xml, config=config).data["additional_info"] == (
+        "Primeira\nSegunda\nTerceira"
+    )
+    assert Danfce(xml=xml).data["additional_info"] == "Primeira;Segunda;Terceira"
+
+
+@pytest.mark.parametrize("paper_width", [80, 58])
+def test_danfce_qr_code_scales_with_the_roll(load_xml, monkeypatch, paper_width):
+    """
+    O QR era fixo em 36mm: numa NFC-e típica (49 módulos) o módulo ficava
+    com 0,68mm, ou 5,4 pontos numa térmica de 203 DPI. Agora acompanha a
+    bobina, como no ACBr.
+    """
+    sizes = []
+    monkeypatch.setattr(
+        "brazilfiscalreport.danfce.danfce.draw_qr_code",
+        lambda *args, **kwargs: sizes.append(kwargs["size"]),
+    )
+    danfce = Danfce(
+        xml=load_xml("danfce/danfce_default.xml"),
+        config=DanfceConfig(paper_width=paper_width),
+    )
+
+    assert sizes and sizes[-1] == pytest.approx(danfce.epw * QR_CODE_RATIO)

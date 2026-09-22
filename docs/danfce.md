@@ -80,6 +80,30 @@ from brazilfiscalreport.danfce import Danfce, DanfceConfig, FontType
 config = DanfceConfig(font_type=FontType.HELVETICA)
 ```
 
+### Logo
+
+The issuer logo is centred at the top of the receipt, scaled to fit a box of 14 mm in height by half the roll width:
+
+```python
+from brazilfiscalreport.danfce import Danfce, DanfceConfig
+
+config = DanfceConfig(logo='logo.jpg')
+```
+
+### Cancelled watermark
+
+```python
+config = DanfceConfig(watermark_cancelled=True)
+```
+
+### Taxpayer message line breaks
+
+Issuers usually pack `infAdic/infCpl` into a single line separated by `;` or `|`. Tell the DANFCe which character that is and it becomes a line break:
+
+```python
+config = DanfceConfig(line_break_char=';')
+```
+
 ### Decimal precision
 
 Prices and quantities are printed with 2 decimal places by default. Retail quantities sold by weight usually need more:
@@ -97,7 +121,8 @@ config = DanfceConfig(
 - The title is followed by the mandatory "Não permite aproveitamento de crédito de ICMS" notice.
 - `tpAmb=2` prints "EMITIDA EM AMBIENTE DE HOMOLOGAÇÃO - SEM VALOR FISCAL", a `tpEmis` other than `1` prints "EMITIDA EM CONTINGÊNCIA", and a document with no `protNFe` prints "Pendente de autorização" — in place of the authorization protocol as well.
 - The totals block closes arithmetically: `VALOR TOTAL - DESCONTO + ACRÉSCIMO = VALOR A PAGAR`. "ACRÉSCIMO" sums the components that add to `vNF` (`vST`, `vFCPST`, `vFrete`, `vSeg`, `vOutro`, `vII`, `vIPI`, `vIPIDevol`) and "DESCONTO" the ones that subtract (`vDesc`, `vICMSDeson`). Both lines are omitted when zero.
-- The approximate taxes (Lei nº 12.741/2012) come from `ICMSTot/vTotTrib`, falling back to the sum of `det/imposto/vTotTrib` when the total is absent.
+- The approximate taxes (Lei nº 12.741/2012) come from `ICMSTot/vTotTrib`, falling back to the sum of `det/imposto/vTotTrib` when the total is absent. When neither is informed the line prints `-----`, not `0,00`.
+- The QR Code takes 70% of the roll width, so its modules stay large enough to scan on thermal paper.
 - The consumer is identified by `CPF`, `CNPJ` or `idEstrangeiro`; without any of them the document prints "CONSUMIDOR NÃO IDENTIFICADO".
 - `infAdic/infCpl` is printed as the taxpayer's message, between the taxes line and the access key.
 - In the paginated fallback, the column header is repeated whenever the item list spills over a page.

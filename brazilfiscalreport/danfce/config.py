@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum
+from io import BytesIO
 from numbers import Number
 
 
@@ -35,6 +36,13 @@ class DanfceConfig:
     margins: Margins = field(default_factory=Margins)
     decimal_config: DecimalConfig = field(default_factory=DecimalConfig)
     font_type: FontType = FontType.TIMES
+    # Logo do emitente, centralizada no topo do cupom.
+    logo: str | BytesIO | bytes | None = None
+    # Marca d'água "CANCELADA" sobre o cupom.
+    watermark_cancelled: bool = False
+    # Caractere que o emitente usa como quebra de linha dentro do infCpl
+    # (";" e "|" são os usuais). Sem isso o texto sai como um bloco corrido.
+    line_break_char: str | None = None
     # Largura da bobina em mm. 80 e 58 são os formatos usuais das
     # impressoras térmicas não fiscais.
     paper_width: Number = 80

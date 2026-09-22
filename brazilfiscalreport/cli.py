@@ -127,8 +127,10 @@ def _build_danfse(module, config_data, xml_content):
 
 
 def _build_danfce(module, config_data, xml_content):
-    # DanfceConfig has no `logo` field
-    config = module.DanfceConfig(margins=_build_margins(config_data, module.Margins))
+    config = module.DanfceConfig(
+        margins=_build_margins(config_data, module.Margins),
+        logo=_resolve_logo(config_data),
+    )
     return module.Danfce(xml=xml_content, config=config)
 
 

@@ -1,6 +1,8 @@
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
 
+from fpdf.enums import Align
+
 from ..generate_qrcode import draw_qr_code
 from ..utils import (
     chunks,
@@ -23,6 +25,7 @@ from .danfce_conf import (
     TOTAL_DEDUCTIONS,
     TP_EMISSAO_NORMAL,
     TP_PAGAMENTO,
+    UNREPORTED_TAX,
     URL,
 )
 
@@ -32,8 +35,15 @@ ITEM_LINE_HEIGHT = 3.5
 ITEM_CODE_WIDTH = 17
 # Largura das colunas dos operadores "x" e "=" da sublinha de valores.
 ITEM_OPERATOR_WIDTH = 4
-# Lado do QR Code, em mm.
-QR_CODE_SIZE = 36
+# Lado do QR Code, como fração da largura útil — mesma proporção do ACBr.
+# Era fixo em 36mm, o que deixava o módulo do QR com 0,68mm numa NFC-e
+# típica: 5,4 pontos numa térmica de 203 DPI, no limite da leitura.
+QR_CODE_RATIO = 0.7
+# Resolução da imagem do QR, em pixels por módulo.
+QR_CODE_BOX_SIZE = 10
+# Caixa em que a logo do emitente é encaixada, preservando a proporção.
+LOGO_MAX_HEIGHT = 14
+LOGO_MAX_WIDTH_RATIO = 0.5
 # Limite clássico de página do PDF (200 polegadas). O fpdf2 não o valida,
 # mas os leitores tratam mal o que passa disso.
 MAX_PAGE_HEIGHT = 5080
@@ -78,6 +88,8 @@ class Danfce(xFPDF):
         self._draw_payments()
         self._draw_additional_info()
         self._draw_footer()
+        # Por último, para ficar sobre o conteúdo.
+        self._draw_watermark()
 
     # --- Altura da bobina ---
 
@@ -158,7 +170,7 @@ class Danfce(xFPDF):
             "payments": self._parse_payments(pag),
             "change": format_number(extract_text(pag, "vTroco"), self.price_precision),
             "consumer": self._parse_consumer(dest),
-            "additional_info": extract_text(inf_adic, "infCpl"),
+            "additional_info": self._format_additional_info(inf_adic),
             "footer": {
                 "key": " ".join(chunks(key_nfe, 4)),
                 "qr_code": extract_text(inf_nfe_supl, "qrCode"),
@@ -168,6 +180,14 @@ class Danfce(xFPDF):
                 "authorized_at": f"{dt_aut} {hr_aut}".strip(),
             },
         }
+
+    def _format_additional_info(self, inf_adic):
+        """Mensagem do contribuinte, com o separador do emitente virando linha."""
+        text = extract_text(inf_adic, "infCpl")
+        separator = self.config.line_break_char
+        if text and separator:
+            text = text.replace(separator, "\n")
+        return text
 
     def _parse_notices(self, ide, prot):
         """Avisos que tiram o valor fiscal do cupom, impressos sob o título."""
@@ -223,7 +243,9 @@ class Danfce(xFPDF):
         return {
             "products": money(to_float(extract_text(total, "vProd"))),
             "payable": money(to_float(extract_text(total, "vNF"))),
-            "taxes": money(taxes),
+            # Zerado significa "não informado", não "sem imposto": imprimir
+            # 0,00 seria afirmar algo que o XML não diz.
+            "taxes": money(taxes) if taxes else UNREPORTED_TAX,
             "item_quantity": str(item_count),
             # Vazio quando não há valor, para o desenho suprimir a linha.
             "increase": money(additions) if additions else "",
@@ -374,9 +396,37 @@ class Danfce(xFPDF):
 
     # --- Blocos do documento ---
 
+    def _draw_logo(self):
+        if not self.config.logo:
+            return
+        self.image(
+            self.config.logo,
+            x=Align.C,
+            w=self.epw * LOGO_MAX_WIDTH_RATIO,
+            h=LOGO_MAX_HEIGHT,
+            keep_aspect_ratio=True,
+        )
+        self.ln(1)
+
+    def _draw_watermark(self):
+        if not self.config.watermark_cancelled:
+            return
+        text = "CANCELADA"
+        font_size = 40
+        self.set_font(self.default_font, "B", font_size)
+        width = self.get_string_width(text)
+        x = (self.w - width) / 2
+        y = self.h / 2
+        with (
+            self.local_context(fill_opacity=0.35, text_color=(128, 128, 128)),
+            self.rotation(55, x + width / 2, y),
+        ):
+            self.text(x, y, text)
+
     def _draw_header(self):
         issuer = self.data["issuer"]
 
+        self._draw_logo()
         self._draw_centered_text(issuer["fant"], font_style="B", add_ln=2)
         self._draw_left_text(issuer["name"], add_ln=2)
         self._draw_split_row(
@@ -626,9 +676,10 @@ class Danfce(xFPDF):
         self._draw_line()
         self.ln(1)
 
+        qr_size = self.epw * QR_CODE_RATIO
         # O QR Code é posicionado em coordenada absoluta, então precisa caber
         # inteiro — junto da legenda acima e do protocolo abaixo.
-        self.ensure_space(QR_CODE_SIZE + 18)
+        self.ensure_space(qr_size + 18)
         self._draw_centered_text("Consulta via leitor de QR Code", add_ln=1)
 
         if footer["qr_code"]:
@@ -638,12 +689,13 @@ class Danfce(xFPDF):
                 self,
                 footer["qr_code"],
                 0,
-                self.l_margin + (self.epw - QR_CODE_SIZE) / 2 - 1,
+                self.l_margin + (self.epw - qr_size) / 2 - 1,
                 y_top - self.t_margin - 1,
-                box_size=QR_CODE_SIZE,
+                box_size=QR_CODE_BOX_SIZE,
                 border=2,
+                size=qr_size,
             )
-            self.set_y(y_top + QR_CODE_SIZE + 4)
+            self.set_y(y_top + qr_size + 4)
         else:
             self.ln(4)
 

@@ -10,6 +10,9 @@ HOMOLOGATION_NOTICE = "EMITIDA EM AMBIENTE DE HOMOLOGAÇÃO - SEM VALOR FISCAL"
 CONTINGENCY_NOTICE = "EMITIDA EM CONTINGÊNCIA"
 PENDING_AUTH_NOTICE = "Pendente de autorização"
 
+# Impresso no lugar do valor quando o XML não informa vTotTrib.
+UNREPORTED_TAX = "-----"
+
 # tpEmis (NF-e leiaute 4.00). 1 e 6..9 não se aplicam à NFC-e, mas o
 # documento pode chegar com qualquer um deles; só o 1 dispensa aviso.
 TP_EMISSAO_NORMAL = "1"
@@ -66,5 +69,6 @@ __all__ = [
     "TOTAL_DEDUCTIONS",
     "TP_EMISSAO_NORMAL",
     "TP_PAGAMENTO",
+    "UNREPORTED_TAX",
     "URL",
 ]

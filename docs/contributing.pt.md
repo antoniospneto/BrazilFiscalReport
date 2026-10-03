@@ -76,11 +76,13 @@ BFR_GENERATE_EXPECTED=1 pytest tests/test_danfe.py
     Não defina `generate=True` diretamente no código de teste — um hook do pre-commit (`no-generate-true`) bloqueia isso. Sempre use a variável de ambiente `BFR_GENERATE_EXPECTED=1`.
 
 !!! warning
-    Regenere os PDFs de referência com a mesma versão do `fpdf2` usada no CI, que sempre instala a versão mais recente. Versões diferentes do `fpdf2` podem gravar um conteúdo de PDF diferente (por exemplo, a matriz de rotação da marca d'água) mesmo com a página visualmente idêntica; assim, uma referência gerada com uma versão antiga passa localmente, mas falha no CI. Atualize antes de regenerar:
+    Regenere os PDFs de referência com as mesmas versões de `fpdf2`, `qrcode`, `python-barcode` e `phonenumbers` usadas no CI, fixadas em `requirements-test.txt`. Versões diferentes do `fpdf2` podem gravar um conteúdo de PDF diferente (por exemplo, a matriz de rotação da marca d'água) mesmo com a página visualmente idêntica; assim, uma referência gerada com outra versão passa localmente, mas falha no CI. Instale as versões fixadas antes de regenerar:
 
     ```bash
-    pip install --upgrade fpdf2
+    pip install -r requirements-test.txt
     ```
+
+    Os bumps dessas versões chegam por PRs do Dependabot; quando um deles mudar a saída, as referências são regeneradas nesse próprio PR.
 
 ## Trabalhando na Documentação
 

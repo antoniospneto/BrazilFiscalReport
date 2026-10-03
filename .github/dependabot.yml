@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    # Só as versões fixadas em requirements-test.txt; o requirements.txt da
+    # raiz pertence ao app demo Streamlit.
+    allow:
+      - dependency-name: fpdf2
+      - dependency-name: phonenumbers
+      - dependency-name: python-barcode
+      - dependency-name: qrcode
+    commit-message:
+      prefix: "CI"

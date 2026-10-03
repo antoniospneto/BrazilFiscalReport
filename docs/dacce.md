@@ -34,9 +34,10 @@ DACCe (Auxiliary Document of the Electronic Correction Letter) is a printed repr
 
 ## Output notes
 
-- The recipient is printed as **CNPJ** (`CNPJDest`) or, for an individual, as **CPF** (`CPFDest`).
-- Events registered in the homologation environment (`tpAmb` = 2) get a **SEM VALOR FISCAL** watermark, like the DANFE.
-- Line breaks in the correction text are kept, including `\n` sent as a literal backslash and `n`.
+- The issuer CNPJ or CPF comes from the XML itself (the event author, in `infEvento`); the other issuer data come from the `emitente` parameter.
+- The recipient is printed as **CNPJ** (`CNPJDest`) or, for an individual, as **CPF** (`CPFDest`). Without either, the line is left out.
+- The **SEM VALOR FISCAL** watermark, like the DANFE's, is applied to homologation events (`tpAmb` = 2) and to events the SEFAZ did not register (no `retEvento`, no `nProt` or a `cStat` other than 135/136). In that case, the protocol line says the event was not registered.
+- Line breaks in the correction text are kept, including `\n` sent as a literal backslash and `n`. When the text does not fit in its box, the font is reduced; if it still does not fit, the text is cut with an ellipsis.
 
 ## Customizing DACCe 🎨
 
@@ -57,22 +58,22 @@ The `DaCCe` class accepts the following parameters:
 **emitente**
 
 - **Type**: `dict` or `None`
-- **Description**: A dictionary containing the issuer (emitente) information. When provided, the issuer details are displayed in the header of the DACCe. All six keys are required when the dictionary is provided; missing keys raise a `KeyError`.
-- **Keys**: `nome`, `end`, `bairro`, `cidade`, `uf`, `fone`. Optional: `cnpj` and `ie`, printed in an extra line of the header when present.
+- **Description**: A dictionary containing the issuer (emitente) information, displayed in the header of the DACCe. The CC-e XML does not carry this data, only the issuer CNPJ/CPF, which is printed even without the dictionary. All keys are optional: missing or empty ones are left out.
+- **Keys**: `nome`, `end`, `bairro`, `cep`, `cidade`, `uf`, `fone` and `ie`.
 - **Example**:
     ```python
     emitente = {
         "nome": "EMPRESA LTDA",
         "end": "AV. TEST, 100",
         "bairro": "CENTRO",
+        "cep": "01010-000",
         "cidade": "SÃO PAULO",
         "uf": "SP",
         "fone": "(11) 1234-5678",
-        "cnpj": "01234567890123",  # optional
-        "ie": "123456789012",  # optional
+        "ie": "123456789012",
     }
     ```
-- **Default**: `None` (no issuer info displayed).
+- **Default**: `None` (only the CNPJ/CPF from the XML is shown in the issuer box).
 
 ---
 

@@ -34,9 +34,10 @@ DACCe (Documento Auxiliar da Carta de Correção Eletrônica) é uma representa�
 
 ## Notas sobre a saída
 
-- O destinatário é impresso como **CNPJ** (`CNPJDest`) ou, no caso de pessoa física, como **CPF** (`CPFDest`).
-- Eventos registrados em homologação (`tpAmb` = 2) recebem a marca d'água **SEM VALOR FISCAL**, como no DANFE.
-- As quebras de linha do texto da correção são mantidas, inclusive `\n` enviado como barra invertida literal seguida de `n`.
+- O CNPJ ou CPF do emitente vem do próprio XML (o autor do evento, em `infEvento`); os demais dados do emitente vêm do parâmetro `emitente`.
+- O destinatário é impresso como **CNPJ** (`CNPJDest`) ou, no caso de pessoa física, como **CPF** (`CPFDest`). Sem nenhum dos dois, a linha é omitida.
+- A marca d'água **SEM VALOR FISCAL**, como no DANFE, é aplicada a eventos de homologação (`tpAmb` = 2) e a eventos que a SEFAZ não registrou (sem `retEvento`, sem `nProt` ou com `cStat` diferente de 135/136). Nesse caso, o lugar do protocolo informa que o evento não foi registrado.
+- As quebras de linha do texto da correção são mantidas, inclusive `\n` enviado como barra invertida literal seguida de `n`. Quando o texto não cabe no quadro, a fonte é reduzida; se ainda assim não couber, o texto é cortado com reticências.
 
 ## Personalizando o DACCe 🎨
 
@@ -57,22 +58,22 @@ A classe `DaCCe` aceita os seguintes parâmetros:
 **emitente**
 
 - **Tipo**: `dict` ou `None`
-- **Descrição**: Um dicionário contendo as informações do emitente. Quando fornecido, os dados do emitente são exibidos no cabeçalho do DACCe. Todas as seis chaves são obrigatórias quando o dicionário é informado; chaves ausentes geram `KeyError`.
-- **Chaves**: `nome`, `end`, `bairro`, `cidade`, `uf`, `fone`. Opcionais: `cnpj` e `ie`, impressos em uma linha extra do cabeçalho quando informados.
+- **Descrição**: Um dicionário contendo as informações do emitente, exibidas no cabeçalho do DACCe. O XML da CC-e não traz esses dados, apenas o CNPJ/CPF do emitente, que é impresso mesmo sem o dicionário. Todas as chaves são opcionais: as ausentes ou vazias são omitidas.
+- **Chaves**: `nome`, `end`, `bairro`, `cep`, `cidade`, `uf`, `fone` e `ie`.
 - **Exemplo**:
     ```python
     emitente = {
         "nome": "EMPRESA LTDA",
         "end": "AV. TEST, 100",
         "bairro": "CENTRO",
+        "cep": "01010-000",
         "cidade": "SÃO PAULO",
         "uf": "SP",
         "fone": "(11) 1234-5678",
-        "cnpj": "01234567890123",  # opcional
-        "ie": "123456789012",  # opcional
+        "ie": "123456789012",
     }
     ```
-- **Padrão**: `None` (nenhuma informação do emitente exibida).
+- **Padrão**: `None` (apenas o CNPJ/CPF do XML é exibido no quadro do emitente).
 
 ---
 

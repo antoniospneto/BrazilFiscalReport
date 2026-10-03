@@ -8,7 +8,7 @@
             <chNFe>99999999999999999999999999999999999999999999</chNFe>
             <dhEvento>2024-03-08T12:00:00-03:00</dhEvento>
             <tpEvento>110110</tpEvento>
-            <nSeqEvento>99</nSeqEvento>
+            <nSeqEvento>1</nSeqEvento>
             <verEvento>9.99</verEvento>
             <detEvento versao="1.00">
                 <descEvento>Evento Fictício</descEvento>
@@ -46,11 +46,11 @@
             <tpAmb>2</tpAmb>
             <verAplic>TESTE202401251654</verAplic>
             <cOrgao>99</cOrgao>
-            <cStat>999</cStat>
-            <xMotivo>Evento fictício registrado e vinculado a NF-e de teste</xMotivo>
+            <cStat>135</cStat>
+            <xMotivo>Evento registrado e vinculado a NF-e</xMotivo>
             <chNFe>99999999999999999999999999999999999999999999</chNFe>
             <tpEvento>110110</tpEvento>
-            <nSeqEvento>99</nSeqEvento>
+            <nSeqEvento>1</nSeqEvento>
             <dhRegEvento>2024-03-08T12:00:00-03:00</dhRegEvento>
             <nProt>999999999999999</nProt>
             <CNPJDest>99999999999999</CNPJDest>

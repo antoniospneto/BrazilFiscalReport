@@ -1,0 +1,8 @@
+# Versões exatas das dependências que desenham no PDF, usadas pelo CI.
+# Os PDFs de referência em tests/generated/ são gerados com estas versões;
+# uma release nova pode mudar o conteúdo do PDF e quebrar a comparação.
+# O Dependabot abre PRs com os bumps; ao aceitar, regenere as referências.
+fpdf2==2.8.9
+phonenumbers==9.0.40
+python-barcode==0.16.1
+qrcode==8.2

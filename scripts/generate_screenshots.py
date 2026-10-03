@@ -24,6 +24,7 @@ EMITENTE = {
     "nome": "EMPRESA LTDA",
     "end": "AV. TESTE, 100",
     "bairro": "CENTRO",
+    "cep": "01010-000",
     "cidade": "SÃO PAULO",
     "uf": "SP",
     "fone": "(11) 1234-5678",

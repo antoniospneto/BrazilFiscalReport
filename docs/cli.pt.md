@@ -66,6 +66,7 @@ ISSUER:
   cidade: "SÃO PAULO"
   uf: "SP"
   fone: "(11) 1234-5678"
+  ie: "123456789012"
 
 LOGO: "/path/to/logo.jpg"
 TOP_MARGIN: 5.0

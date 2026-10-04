@@ -2,6 +2,14 @@ URL = ".//{http://www.portalfiscal.inf.br/nfe}"
 DEFAULT_FIELD_HEIGHT = 6
 DEFAULT_HEIGHT_FONT_CONTENT = 3
 HEIGHT_FONT_BLOCK_DESC = 3
+# Product table: line height of the item rows (multiplied by the font size
+# factor), line height of the header row and inner padding of every cell.
+PRODUCT_LINE_HEIGHT = 2.5
+PRODUCT_HEADER_LINE_HEIGHT = 2.2
+PRODUCT_CELL_PADDING = 0.5
+# QR Code box printed beside "DADOS ADICIONAIS" (NT 2026.010, item 4.5).
+QR_CODE_BLOCK_WIDTH = 26
+QR_CODE_BLOCK_GAP = 2
 BASE_FONT_SIZES = {
     "FONT_SIZE_DESC": 5,
     "H_FONT_DESC": 2.8,

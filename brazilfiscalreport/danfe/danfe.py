@@ -3,11 +3,12 @@
 
 import re
 import xml.etree.ElementTree as ET
+from itertools import zip_longest
 from xml.etree.ElementTree import Element
 
-from fpdf import FontFace
-from fpdf.enums import Align, VAlign
+from fpdf.enums import MethodReturnValue
 
+from ..generate_qrcode import make_qr_code_image
 from ..utils import (
     chunks,
     format_cep,
@@ -27,12 +28,17 @@ from .danfe_conf import (
     BASE_FONT_SIZES,
     DEFAULT_FIELD_HEIGHT,
     HEIGHT_FONT_BLOCK_DESC,
+    PRODUCT_CELL_PADDING,
+    PRODUCT_HEADER_LINE_HEIGHT,
+    PRODUCT_LINE_HEIGHT,
+    QR_CODE_BLOCK_GAP,
+    QR_CODE_BLOCK_WIDTH,
     URL,
 )
 from .danfe_emit_info import DanfeEmitInfo
 from .danfe_ident_info import DanfeIdentInfo
 from .danfe_verification_msg import DanfeVerificationMsg
-from .models import BaseFieldInfo, ProductInfo
+from .models import BaseFieldInfo, LabeledValue, ProductInfo
 
 tp_frete = {
     "0": "0 - Remetente",
@@ -43,6 +49,13 @@ tp_frete = {
     "9": "9 - Sem Frete",
 }
 
+crt_description = {
+    "1": "1 - SIMPLES NACIONAL",
+    "2": "2 - SIMPLES NACIONAL - EXCESSO DE SUBLIMITE DE RECEITA BRUTA",
+    "3": "3 - REGIME NORMAL",
+    "4": "4 - SIMPLES NACIONAL - MEI",
+}
+
 RECEIPT_DEFAULT = "default"
 RECEIPT_COLLECTION = "collection"
 RECEIPT_DELIVERY = "delivery"
@@ -50,6 +63,42 @@ RECEIPT_DELIVERY = "delivery"
 
 def extract_text(node: Element, tag: str) -> str:
     return get_tag_text(node, URL, tag)
+
+
+def format_optional_number(node: Element, tag: str, precision: int = 2) -> str:
+    """
+    Format the value of `tag`, leaving the field blank when the tag is absent
+    from the XML (NT 2026.010, item 4.4: information that does not exist in the
+    XML must not be printed, not even as zero).
+    """
+    text = extract_text(node, tag)
+    return format_number(text, precision) if text else ""
+
+
+def format_rate(rate: str) -> str:
+    """Format a tax rate with 2 to 4 decimals, e.g. 12,00% or 8,6625%."""
+    formatted = format_number(rate, precision=4) if rate else ""
+    if not formatted:
+        return ""
+    integer, decimals = formatted.split(",")
+    return f"{integer},{decimals.rstrip('0'):0<2}%"
+
+
+def interleave(lefts, rights):
+    """Read two columns line by line: lefts[0], rights[0], lefts[1], ..."""
+    return [
+        item for pair in zip_longest(lefts, rights) for item in pair if item is not None
+    ]
+
+
+def has_nonzero_value(node: Element, tags) -> bool:
+    for tag in tags:
+        try:
+            if float(extract_text(node, tag) or 0):
+                return True
+        except ValueError:
+            continue
+    return False
 
 
 class Danfe(xFPDF):
@@ -94,12 +143,17 @@ class Danfe(xFPDF):
         self.retirada = root.find(f"{URL}retirada")
         self.entrega = root.find(f"{URL}entrega")
         self.totais = root.find(f"{URL}total")
+        self.icms_tot = root.find(f"{URL}ICMSTot")
+        self.is_tot = root.find(f"{URL}ISTot")
+        self.ibscbs_tot = root.find(f"{URL}IBSCBSTot")
         self.transp = root.find(f"{URL}transp")
         self.cobr = root.find(f"{URL}cobr")
         self.det = root.findall(f"{URL}det")
         self.inf_adic = root.find(f"{URL}infAdic")
         self.issqn_tot = root.find(f"{URL}ISSQNtot")
         self.crt = extract_text(self.emit, "CRT")
+        qr_code = (extract_text(root, "qrCode") or "").strip()
+        self.qr_code_image = make_qr_code_image(qr_code) if qr_code else None
 
         self.total_receipt_height = 19  # TODO need compute
 
@@ -166,16 +220,16 @@ class Danfe(xFPDF):
             self._draw_recipient_sender()
             self._draw_delivery_location()
             self._draw_billing()
-            self._draw_taxes()
+            self._draw_totals()
+            self._draw_issqn_calculation()
             self._draw_shipping()
             y_after = self.get_y()
         height_before = y_after - y_before
 
         # blocks after products
-        # ISSQN and DADOS ADICIONAIS
+        # DADOS ADICIONAIS
         with self._disable_writing():
             y_before = self.get_y()
-            self._draw_issqn_calculation()
             self._draw_additional_data(addit_data_current_page)
             if self.receipt_pos == ReceiptPosition.BOTTOM:
                 self._draw_receipts()
@@ -214,12 +268,12 @@ class Danfe(xFPDF):
         self._draw_recipient_sender()
         self._draw_delivery_location()
         self._draw_billing()
-        self._draw_taxes()
+        self._draw_totals()
+        self._draw_issqn_calculation()
         self._draw_shipping()
         self._draw_products(
             available_height_product_table, products_for_current_page, p_addit_data
         )
-        self._draw_issqn_calculation()
         self._draw_additional_data(addit_data_current_page)
         if self.receipt_pos == ReceiptPosition.BOTTOM:
             self._draw_receipts()
@@ -390,14 +444,20 @@ class Danfe(xFPDF):
         products = []
         for _det in self.det:
             el_prod = _det.find(f"{URL}prod")
-            # el_imp = _det.find(f"{URL}imposto")
             el_imp_ICMS = _det.find(f"{URL}ICMS")
-            el_imp_IPI = _det.find(f"{URL}IPI")
 
             inf_ad_prod = self._build_inf_ad_prod(
                 el_prod, extract_text(_det, "infAdProd")
             )
             x_prod = extract_text(el_prod, "xProd")
+            description = self._merge_product_description(x_prod, inf_ad_prod)
+            # NCM and the IBS/CBS tax classification go to the bottom of the
+            # description (NT 2026.010, item 4.3).
+            fiscal_ids = f"[NCM {extract_text(el_prod, 'NCM')}]"
+            c_class_trib = extract_text(_det, "cClassTrib")
+            if c_class_trib:
+                fiscal_ids += f" [cClassTrib {c_class_trib}]"
+            description += "\n" + fiscal_ids
 
             u_com = extract_text(el_prod, "uCom")
             q_com = format_number(
@@ -416,38 +476,117 @@ class Danfe(xFPDF):
             )
 
             # merge commercial and taxable values
-            unid = merge_if_different(u_com, u_trib)
-            qty = merge_if_different(q_com, q_trib)
+            qty_unit = merge_if_different(f"{q_com}\n{u_com}", f"{q_trib}\n{u_trib}")
             unit_price = merge_if_different(v_un_com, v_un_trib)
 
             # merge 'origem' with 'CST' of ICMS.
             orig = extract_text(el_imp_ICMS, "orig")
             if self.crt in ["1", "4"]:
                 # Regime Simples Nacional
+                cst_label = "CSOSN"
                 cst = extract_text(el_imp_ICMS, "CSOSN")
             else:
                 # Regime Normal
+                cst_label = "CST"
                 cst = extract_text(el_imp_ICMS, "CST")
-            o_cst = orig + cst
 
+            cst_cfop = [LabeledValue("CFOP", extract_text(el_prod, "CFOP"))]
+            if orig + cst:
+                # items of services (ISSQN) have no ICMS group
+                cst_cfop.insert(0, LabeledValue(cst_label, orig + cst))
+
+            tax_bases, tax_rates, tax_values = self._get_product_taxes(_det)
             product = ProductInfo(
                 code=extract_text(el_prod, "cProd"),
-                description=self._merge_product_description(x_prod, inf_ad_prod),
-                ncm_sh=extract_text(el_prod, "NCM"),
-                cst=o_cst,
-                cfop=extract_text(el_prod, "CFOP"),
-                unid=unid,
-                qty=qty,
+                description=description,
+                cst_cfop=cst_cfop,
+                qty_unit=qty_unit,
                 unit_price=unit_price,
                 total_price=format_number(extract_text(el_prod, "vProd"), 2),
-                bs_icms=format_number(extract_text(el_imp_ICMS, "vBC"), 2),
-                icms_value=format_number(extract_text(el_imp_ICMS, "vICMS"), 2),
-                ipi_value=format_number(extract_text(el_imp_IPI, "vIPI"), 2),
-                icms_rate=format_number(extract_text(el_imp_ICMS, "pICMS"), 2),
-                ipi_rate=format_number(extract_text(el_imp_IPI, "pIPI"), 2),
+                tax_bases=tax_bases,
+                tax_rates=tax_rates,
+                tax_values=tax_values,
             )
             products.append(product)
         return products
+
+    def _get_product_taxes(self, det):
+        """
+        Return the item's tax bases, rates and values (NT 2026.010, item 4.3).
+
+        Only the taxes whose group is present in the item are listed, so a
+        NF-e without IBS/CBS/IS keeps a compact row. Rates and values are
+        split in the two columns of the reference layout, which prints them
+        two per line: ICMS / CBS, IBS UF / IPI and IBS MUN / IS.
+        """
+        icms = det.find(f"{URL}ICMS")
+        ipi = det.find(f"{URL}IPITrib")
+        imp_seletivo = det.find(f"{URL}IS")
+        ibscbs = det.find(f"{URL}gIBSCBS")
+        ibs_uf = ibs_mun = cbs = None
+        if ibscbs is not None:
+            ibs_uf = ibscbs.find(f"{URL}gIBSUF")
+            ibs_mun = ibscbs.find(f"{URL}gIBSMun")
+            cbs = ibscbs.find(f"{URL}gCBS")
+
+        bases = []
+        if icms is not None:
+            bases.append(LabeledValue("ICMS", format_optional_number(icms, "vBC")))
+        if ibscbs is not None:
+            bases.append(
+                LabeledValue("IBS / CBS", format_optional_number(ibscbs, "vBC"))
+            )
+        if imp_seletivo is not None:
+            bases.append(
+                LabeledValue("IS", format_optional_number(imp_seletivo, "vBCIS"))
+            )
+        if ipi is not None:
+            bases.append(LabeledValue("IPI", format_optional_number(ipi, "vBC")))
+        # e.g. ICMS 40 (exempt) or 02 (single-phase, taxed by quantity) have
+        # no base, rate or value to print.
+        bases = [base for base in bases if base.value]
+
+        left, right = [], []
+        if icms is not None:
+            left.append(("ICMS", icms, extract_text(icms, "pICMS"), "vICMS"))
+        if ibscbs is not None:
+            left.append(
+                ("IBS UF", ibs_uf, self._ibscbs_rate(ibs_uf, "pIBSUF"), "vIBSUF")
+            )
+            left.append(
+                ("IBS MUN", ibs_mun, self._ibscbs_rate(ibs_mun, "pIBSMun"), "vIBSMun")
+            )
+            right.append(("CBS", cbs, self._ibscbs_rate(cbs, "pCBS"), "vCBS"))
+        if ipi is not None:
+            right.append(("IPI", ipi, extract_text(ipi, "pIPI"), "vIPI"))
+        if imp_seletivo is not None:
+            right.append(("IS", imp_seletivo, extract_text(imp_seletivo, "pIS"), "vIS"))
+
+        def columns(taxes):
+            rates, values = [], []
+            for label, group, rate, value_tag in taxes:
+                rate = format_rate(rate)
+                value = format_optional_number(group, value_tag)
+                if rate or value:
+                    rates.append(LabeledValue(label, rate))
+                    values.append(LabeledValue(label, value))
+            return rates, values
+
+        left_rates, left_values = columns(left)
+        right_rates, right_values = columns(right)
+        return bases, (left_rates, right_rates), (left_values, right_values)
+
+    @staticmethod
+    def _ibscbs_rate(group, rate_tag):
+        """
+        IBS UF, IBS Município and CBS print the effective rate (pAliqEfet)
+        when the rate reduction group (gRed) is informed, which also happens
+        on government purchases; otherwise the regular rate.
+        """
+        reduction = group.find(f"{URL}gRed") if group is not None else None
+        if reduction is not None:
+            return extract_text(reduction, "pAliqEfet")
+        return extract_text(group, rate_tag)
 
     def _get_additional_data_content(self):
         fisco = extract_text(self.inf_adic, "infAdFisco")
@@ -491,12 +630,12 @@ class Danfe(xFPDF):
                 list, divided based on the maximum allowed height.
         """
         with self._disable_writing():
-            row_info_list = self._draw_products(height_product_table, products)[0]
-        product_header_height = row_info_list.pop(0).height
+            rows_heights = self._draw_products(height_product_table, products)[0]
+        product_header_height = rows_heights.pop(0)
         actual_height = product_header_height
         product_index = 0
-        for i, row_info in enumerate(row_info_list):
-            actual_height += row_info.height
+        for i, row_height in enumerate(rows_heights):
+            actual_height += row_height
             if actual_height <= height_product_table:
                 product_index = i
             else:
@@ -545,11 +684,13 @@ class Danfe(xFPDF):
                     addit_data_next_pages = []
         return addit_data, addit_data_next_pages
 
-    def _product_col_widths(self, cst_width: float) -> tuple[float | None, ...]:
+    def _product_col_widths(self) -> tuple[float | None, ...]:
+        # CÓDIGO, DESCRIÇÃO, CST/CFOP, QTD/UN, VLR UNIT, VLR TOTAL,
+        # BASES DE CÁLCULO, ALÍQUOTAS, VALOR DOS TRIBUTOS
         if self.default_font_factor is FontSize.SMALL.value:
-            return (15, None, 11, cst_width, 7, 6, 12, 13, 13, 13, 10, 10, 9, 8)
+            return (13, None, 13, 15, 15, 15, 25, 28, 36)
         elif self.default_font_factor is FontSize.BIG.value:
-            return (15, None, 14, 8, 8, 8, 12, 13, 15, 14, 13, 10, 9, 9)
+            return (15, None, 17, 18, 18, 18, 29, 24, 28)
 
         raise ValueError(f"Unsupported FontSize: {self.default_font_factor}")
 
@@ -882,6 +1023,23 @@ class Danfe(xFPDF):
             pdf=self,
         )
         b_emit.add_field(f_emit_cnpj)
+        f_emit_crt = DanfeBasicField(
+            w=b_emit.w / 2,
+            description="CÓDIGO DO REGIME TRIBUTÁRIO",
+            content=crt_description.get(self.crt, self.crt),
+            pdf=self,
+        )
+        b_emit.add_field(f_emit_crt)
+        # Reserved by NT 2026.010 (item 4.2): stays blank until a future NT
+        # defines the XML tag that carries this information.
+        b_emit.add_field(
+            DanfeBasicField(
+                w=b_emit.w - f_emit_crt.w,
+                description="TIPO DE REGIME DE APURAÇÃO DO IBS E DA CBS",
+                content="",
+                pdf=self,
+            )
+        )
         b_emit.render()
 
     def _draw_recipient_sender(self):
@@ -1245,105 +1403,120 @@ class Danfe(xFPDF):
             self.ln()  # Line break after each group of `duplicatas`
             self.x = old_x  # fix start left position
 
-    def _draw_taxes(self):
-        block_impostos = DanfeBlock(
-            description="CÁLCULO DO IMPOSTO",
-            rows_heights=(
-                DEFAULT_FIELD_HEIGHT,
-                DEFAULT_FIELD_HEIGHT,
-            ),
+    def _draw_totals(self):
+        # The reference layout of NT 2026.010 replaces the "CÁLCULO DO IMPOSTO"
+        # block by the totals of the note, of ICMS/IPI and, new in item 4.1,
+        # of IBS/CBS/IS.
+        self._draw_totals_block(
+            "TOTAL DOS PRODUTOS E TOTAL DA NOTA", self._get_note_totals_lines()
+        )
+        self._draw_totals_block("TOTAL DO ICMS / IPI", self._get_icms_ipi_lines())
+        self._draw_totals_block("TOTAL DO IBS / CBS / IS", self._get_ibs_cbs_is_lines())
+
+    def _draw_totals_block(self, description, lines):
+        block = DanfeBlock(
+            description=description,
+            rows_heights=(DEFAULT_FIELD_HEIGHT,) * len(lines),
             pdf=self,
         )
+        block.add_fields(
+            [
+                [
+                    BaseFieldInfo(
+                        w=0, description=label, content=content, type="number"
+                    )
+                    for label, content in line
+                ]
+                for line in lines
+            ]
+        )
+        block.render()
 
-        # Content Data
-        v_bc = format_number(extract_text(self.totais, "vBC"), precision=2)
-        v_icms = format_number(extract_text(self.totais, "vICMS"), precision=2)
-        v_bcst = format_number(extract_text(self.totais, "vBCST"), precision=2)
-        v_st = format_number(extract_text(self.totais, "vST"), precision=2)
-        v_pis = format_number(extract_text(self.totais, "vPIS"), precision=2)
-        v_prod = format_number(extract_text(self.totais, "vProd"), precision=2)
-        v_frete = format_number(extract_text(self.totais, "vFrete"), precision=2)
-        v_seg = format_number(extract_text(self.totais, "vSeg"), precision=2)
-        v_desc = format_number(extract_text(self.totais, "vDesc"), precision=2)
-        v_outro = format_number(extract_text(self.totais, "vOutro"), precision=2)
-        v_ipi = format_number(extract_text(self.totais, "vIPI"), precision=2)
-        v_confins = format_number(extract_text(self.totais, "vCOFINS"), precision=2)
-        v_nf = format_number(extract_text(self.totais, "vNF"), precision=2)
-        v_tot_trib = format_number(extract_text(self.totais, "vTotTrib"), precision=2)
+    def _get_note_totals_lines(self):
+        def total(tag):
+            return format_optional_number(self.icms_tot, tag)
 
-        fields_line1 = [
-            BaseFieldInfo(
-                w=30, description="BASE DE CÁLCULO DO ICMS", content=v_bc, type="number"
-            ),
-            BaseFieldInfo(
-                w=30, description="VALOR DO ICMS", content=v_icms, type="number"
-            ),
-            BaseFieldInfo(
-                w=30,
-                description="BASE DE CÁLCULO DO ICMS ST",
-                content=v_bcst,
-                type="number",
-            ),
-            BaseFieldInfo(
-                w=30, description="VALOR DO ICMS ST ", content=v_st, type="number"
-            ),
-            BaseFieldInfo(
-                w=30,
-                description="VALOR APROX. TRIBUTOS",
-                content=v_tot_trib,
-                type="number",
-            ),
-            BaseFieldInfo(
-                w=0,
-                description="VALOR TOTAL DOS PRODUTOS",
-                content=v_prod,
-                type="number",
-            ),
-        ]
-        fields_line2 = [
-            BaseFieldInfo(
-                w=30, description="VALOR DO FRETE", content=v_frete, type="number"
-            ),
-            BaseFieldInfo(
-                w=30, description="VALOR DO SEGURO", content=v_seg, type="number"
-            ),
-            BaseFieldInfo(w=30, description="DESCONTO", content=v_desc, type="number"),
-            BaseFieldInfo(
-                w=30,
-                description="OUTRAS DESPESAS ACESSÓRIAS",
-                content=v_outro,
-                type="number",
-            ),
-            BaseFieldInfo(
-                w=30, description="VALOR DO IPI", content=v_ipi, type="number"
-            ),
-            BaseFieldInfo(
-                w=0, description="VALOR TOTAL DA NOTA", content=v_nf, type="number"
-            ),
-        ]
+        line2 = []
+        if extract_text(self.icms_tot, "vTotTrib"):
+            line2.append(("VALOR APROX. TRIBUTOS", total("vTotTrib")))
         if self.display_pis_cofins:
-            fields_line1.insert(
-                -1,
-                BaseFieldInfo(
-                    w=0, description="VALOR DO PIS", content=v_pis, type="number"
+            line2.append(("VALOR DO PIS", total("vPIS")))
+            line2.append(("VALOR DA COFINS", total("vCOFINS")))
+        line2.append(("VALOR TOTAL DA NOTA", total("vNF")))
+        return [
+            [
+                ("VALOR TOTAL DOS PRODUTOS", total("vProd")),
+                ("VALOR DO FRETE", total("vFrete")),
+                ("VALOR DO SEGURO", total("vSeg")),
+                ("DESCONTO", total("vDesc")),
+                ("OUTRAS DESPESAS ACESSÓRIAS", total("vOutro")),
+            ],
+            line2,
+        ]
+
+    def _get_icms_ipi_lines(self):
+        def total(tag):
+            return format_optional_number(self.icms_tot, tag)
+
+        lines = [
+            [
+                ("BASE DE CÁLCULO DO ICMS", total("vBC")),
+                ("VALOR DO ICMS", total("vICMS")),
+                ("BASE DE CÁLCULO DO ICMS ST", total("vBCST")),
+                ("VALOR DO ICMS ST", total("vST")),
+                ("VALOR DO IPI", total("vIPI")),
+            ]
+        ]
+        # Optional lines (NT 2026.010, item 4.4): printed only when the NF-e
+        # carries a non-zero value for at least one of their fields.
+        fcp_line = [
+            ("VALOR DO FCP", "vFCP"),
+            ("VALOR DO FCP RETIDO POR ST", "vFCPST"),
+            ("VALOR DO DIFAL NA UF DE DESTINO", "vICMSUFDest"),
+            ("VALOR DO FCP NA UF DE DESTINO", "vFCPUFDest"),
+        ]
+        mono_line = [
+            ("BC DO ICMS MONOFÁSICO", "qBCMono"),
+            ("VALOR DO ICMS MONOFÁSICO", "vICMSMono"),
+            ("BC DO ICMS MONOFÁSICO POR RETENÇÃO", "qBCMonoReten"),
+            ("VALOR DO ICMS MONOFÁSICO POR RETENÇÃO", "vICMSMonoReten"),
+        ]
+        for line in (fcp_line, mono_line):
+            if has_nonzero_value(self.icms_tot, [tag for _, tag in line]):
+                lines.append([(label, total(tag)) for label, tag in line])
+        return lines
+
+    def _get_ibs_cbs_is_lines(self):
+        def total(tag):
+            return format_optional_number(self.ibscbs_tot, tag)
+
+        lines = [
+            [
+                ("VALOR DA CBS", total("vCBS")),
+                ("VALOR DO IBS UF", total("vIBSUF")),
+                ("VALOR DO IBS MUNICÍPIO", total("vIBSMun")),
+                (
+                    "VALOR DO IMPOSTO SELETIVO",
+                    format_optional_number(self.is_tot, "vIS"),
                 ),
+            ]
+        ]
+        g_mono = None
+        if self.ibscbs_tot is not None:
+            g_mono = self.ibscbs_tot.find(f"{URL}gMono")
+        if g_mono is not None:
+            lines.append(
+                [
+                    ("VALOR DO IBS MONOFÁSICO", total("vIBSMono")),
+                    ("VALOR DA CBS MONOFÁSICA", total("vCBSMono")),
+                    ("VALOR DO IBS MONOFÁSICO POR RETENÇÃO", total("vIBSMonoReten")),
+                    ("VALOR DA CBS MONOFÁSICA POR RETENÇÃO", total("vCBSMonoReten")),
+                ]
             )
-            fields_line2.insert(
-                -1,
-                BaseFieldInfo(
-                    w=0, description="VALOR DO COFINS", content=v_confins, type="number"
-                ),
-            )
-        block_impostos.add_fields([fields_line1, fields_line2])
-        block_impostos.render()
+        return lines
 
     def _draw_shipping(self):
         block_transporte = DanfeBlock(
-            rows_heights=(
-                DEFAULT_FIELD_HEIGHT,
-                DEFAULT_FIELD_HEIGHT,
-                DEFAULT_FIELD_HEIGHT,
-            ),
             description="TRANSPORTADOR / VOLUMES TRANSPORTADOS",
             pdf=self,
         )
@@ -1414,62 +1587,36 @@ class Danfe(xFPDF):
             BaseFieldInfo(w=0, description="PESO LÍQUIDO", content=peso_l),
         ]
 
-        block_transporte.add_fields([fields_line1, fields_line2, fields_line3])
+        # The carrier and volume details are printed only when the NF-e has
+        # them (NT 2026.010, item 4.4); the freight mode is always printed.
+        lines = [fields_line1]
+        if transporta is not None and len(transporta):
+            lines.append(fields_line2)
+        if vol is not None and len(vol):
+            lines.append(fields_line3)
+        block_transporte.rows_heights = (DEFAULT_FIELD_HEIGHT,) * len(lines)
+        block_transporte.add_fields(lines)
         block_transporte.render()
 
     def _draw_products(self, height_product_table, products, additional_data=""):
         DanfeBlock(
-            description="DADOS DO PRODUTO / SERVIÇO",
+            description="DADOS DOS PRODUTOS / SERVIÇOS",
             pdf=self,
         ).render()
-        cst_label = "CST"
-        cst_width = 6
-        if self.crt in ["1", "4"]:
-            # Regime Simples Nacional
-            cst_label = "CSOSN"
-            cst_width = 8
-        colunas = [
-            "CÓDIGO",
-            "DESCRIÇÃO DOS PRODUTOS / SERVIÇOS",
-            "NCM/SH",
-            cst_label,
-            "CFOP",
-            "UN.",
-            "QTD.",
-            "V.UNIT.",
-            # "DESCONTO",
-            "V.TOTAL",
-            "BC.ICMS",
-            # "B.CÁLC.ICMS ST",
-            # "VALOR ICMS ST",
-            "V.ICMS",
-            "V.IPI",
-            "%ICMS",
-            "%IPI",
-        ]
-        monetary_fields_index = [6, 7, 8, 9, 10, 11, 12, 13]
-        col_widths = self._product_col_widths(cst_width)
-        defined_width = sum(filter(None, col_widths))
-        none_width = self.edw - defined_width
-        fixed_col_widths = tuple(w if w is not None else none_width for w in col_widths)
+        col_widths = self._product_col_widths()
+        none_width = self.edw - sum(filter(None, col_widths))
+        col_widths = [w if w is not None else none_width for w in col_widths]
         y_before = self.get_y()
         x_before = self.get_x()
-        self.set_font(
-            self.default_font, "", self.get_font_size("PRODUCT_DESCRIPTION", True)
-        )
-        title_style = FontFace(emphasis="BOLD", size_pt=5)
-        with self.table(
-            col_widths=fixed_col_widths, line_height=3, width=self.edw, align="R"
-        ) as table:
-            row = table.row()
-            for coluna in colunas:
-                row.cell(text=coluna, style=title_style, v_align=VAlign.T)
-            for product in products:
-                row = table.row()
-                for i, value in enumerate(product):
-                    align = Align.R if i in monetary_fields_index else Align.L
-                    row.cell(text=value, align=align, v_align=VAlign.T)
-        # restore x position
+
+        # The cells are padded by PRODUCT_CELL_PADDING, so the text is placed
+        # without fpdf2's own interior cell margin.
+        c_margin = self.c_margin
+        self.c_margin = 0
+        rows_heights = [self._draw_product_header(col_widths)]
+        for product in products:
+            rows_heights.append(self._draw_product_row(product, col_widths))
+        self.c_margin = c_margin
         self.x = x_before
 
         product_height = self.get_y() - y_before
@@ -1495,29 +1642,206 @@ class Danfe(xFPDF):
         self.y = old_y + h
         self.x = x_before
 
-        # return info with rows heights
-        row_info = list(table._compute_rows_info())
-        return row_info, add_info_lines, max_add_info_lines
+        return rows_heights, add_info_lines, max_add_info_lines
+
+    def _draw_product_header(self, col_widths):
+        cst_title = "CSOSN / CFOP" if self.crt in ["1", "4"] else "CST / CFOP"
+        titles = (
+            "CÓDIGO",
+            "DESCRIÇÃO DO PRODUTO / SERVIÇO",
+            cst_title,
+            "QTD / UN",
+            "VLR UNIT",
+            "VLR TOTAL",
+            "BASES DE CÁLCULO",
+            "ALÍQUOTAS",
+            "VALOR DOS TRIBUTOS",
+        )
+        self.set_font(self.default_font, "B", 5)
+        line_h = PRODUCT_HEADER_LINE_HEIGHT
+        titles_lines = [
+            self._split_text_lines(title, w - 2 * PRODUCT_CELL_PADDING)
+            for title, w in zip(titles, col_widths, strict=True)
+        ]
+        height = (
+            max(len(lines) for lines in titles_lines) * line_h
+            + 2 * PRODUCT_CELL_PADDING
+        )
+        x, y = self.get_x(), self.get_y()
+        for w, lines in zip(col_widths, titles_lines, strict=True):
+            self.rect(x=x, y=y, w=w, h=height)
+            # vertically centered
+            y_text = y + (height - len(lines) * line_h) / 2
+            for i, line in enumerate(lines):
+                self.set_xy(x=x, y=y_text + i * line_h)
+                self.cell(w=w, h=line_h, text=line, align="C")
+            x += w
+        self.set_xy(x=x - sum(col_widths), y=y + height)
+        return height
+
+    def _draw_product_row(self, product, col_widths):
+        self.set_font(
+            self.default_font, "", self.get_font_size("PRODUCT_DESCRIPTION", True)
+        )
+        line_h = PRODUCT_LINE_HEIGHT * self.default_font_factor
+        inner_widths = [w - 2 * PRODUCT_CELL_PADDING for w in col_widths]
+        (
+            w_code,
+            w_desc,
+            w_cst_cfop,
+            w_qty,
+            w_unit_price,
+            w_total,
+            w_bases,
+            w_rates,
+            w_values,
+        ) = inner_widths
+
+        # ALÍQUOTAS and VALOR DOS TRIBUTOS share the same order of taxes, so
+        # both are printed two per line only when both fit that way.
+        tax_rates = self._labeled_lines_paired(*product.tax_rates, w_rates)
+        tax_values = self._labeled_lines_paired(*product.tax_values, w_values)
+        if tax_rates is None or tax_values is None:
+            tax_rates = self._labeled_lines(interleave(*product.tax_rates), w_rates)
+            tax_values = self._labeled_lines(interleave(*product.tax_values), w_values)
+
+        cells = [
+            self._text_lines(product.code, w_code, "L"),
+            self._text_lines(product.description, w_desc, "L"),
+            self._labeled_lines(product.cst_cfop, w_cst_cfop),
+            self._text_lines(product.qty_unit, w_qty, "C"),
+            self._text_lines(product.unit_price, w_unit_price, "R"),
+            self._text_lines(product.total_price, w_total, "R"),
+            self._labeled_lines(product.tax_bases, w_bases),
+            tax_rates,
+            tax_values,
+        ]
+        height = max(1, *(len(lines) for lines in cells)) * line_h
+        height += 2 * PRODUCT_CELL_PADDING
+
+        x, y = self.get_x(), self.get_y()
+        for w, lines in zip(col_widths, cells, strict=True):
+            self.rect(x=x, y=y, w=w, h=height)
+            x_inner = x + PRODUCT_CELL_PADDING
+            for i, segments in enumerate(lines):
+                y_line = y + PRODUCT_CELL_PADDING + i * line_h
+                for x_offset, w_segment, text, align in segments:
+                    if text:
+                        self.set_xy(x=x_inner + x_offset, y=y_line)
+                        self.cell(w=w_segment, h=line_h, text=text, align=align)
+            x += w
+        self.set_xy(x=x - sum(col_widths), y=y + height)
+        return height
+
+    def _split_text_lines(self, text, width):
+        return self.multi_cell(
+            w=width,
+            h=1,
+            text=text,
+            dry_run=True,
+            output=MethodReturnValue.LINES,
+        )
+
+    def _text_lines(self, text, width, align):
+        """Wrap `text` and return its lines as drawable segments."""
+        if not text:
+            return []
+        return [
+            [(0, width, line, align)] for line in self._split_text_lines(text, width)
+        ]
+
+    def _labeled_width(self, item):
+        width = self.get_string_width(item.label)
+        if item.value:
+            # at least one dot between the label and the value
+            width += self.get_string_width(".") + self.get_string_width(item.value)
+        return width
+
+    def _labeled_segments(self, item, x, width):
+        """
+        Label on the left and value on the right, joined by dot leaders, as
+        in "ICMS.......1.234,56".
+        """
+        label = item.label
+        if item.value:
+            free_width = (
+                width
+                - self.get_string_width(item.label)
+                - self.get_string_width(item.value)
+            )
+            label += "." * max(int(free_width / self.get_string_width(".")), 0)
+        return [(x, width, label, "L"), (x, width, item.value, "R")]
+
+    def _labeled_lines(self, items, width):
+        """One labeled value per line; the value wraps if it does not fit."""
+        lines = []
+        for item in items:
+            if self._labeled_width(item) <= width:
+                lines.append(self._labeled_segments(item, 0, width))
+            else:
+                lines.append([(0, width, item.label, "L")])
+                if item.value:
+                    lines.append([(0, width, item.value, "R")])
+        return lines
+
+    def _labeled_lines_paired(self, lefts, rights, width):
+        """
+        Two columns of labeled values, as in "ICMS....12,00% / CBS....0,90%".
+        Return None when they do not fit in `width`.
+        """
+        separator = " / "
+        w_separator = self.get_string_width(separator)
+        w_left = max((self._labeled_width(item) for item in lefts), default=0)
+        w_right = max((self._labeled_width(item) for item in rights), default=0)
+        slack = width - w_left - w_separator - w_right
+        if slack < 0:
+            return None
+        w_left += slack / 2
+        x_right = w_left + w_separator
+        lines = []
+        for left, right in zip_longest(lefts, rights):
+            segments = []
+            if left is not None:
+                segments += self._labeled_segments(left, 0, w_left)
+            if left is not None and right is not None:
+                segments.append((w_left, w_separator, separator, "C"))
+            if right is not None:
+                segments += self._labeled_segments(right, x_right, width - x_right)
+            lines.append(segments)
+        return lines
 
     def _draw_issqn_calculation(self):
         if self.issqn_tot is None:
             return
-        # content data
-        im = extract_text(self.emit, "IM")
-        v_serv = extract_text(self.issqn_tot, "vServ")
-        v_bc = extract_text(self.issqn_tot, "vBC")
-        v_iss = extract_text(self.issqn_tot, "vISS")
-
         block_issqn = DanfeBlock(
             rows_heights=(DEFAULT_FIELD_HEIGHT,),
             description="CÁLCULO DO ISSQN",
             pdf=self,
         )
         fields = [
-            BaseFieldInfo(w=0, description="INSCRIÇÃO MUNICIPAL", content=im),
-            BaseFieldInfo(w=45, description="VALOR TOTAL DOS SERVIÇOS", content=v_serv),
-            BaseFieldInfo(w=45, description="BASE DO CÁLCULO DO ISSQN", content=v_bc),
-            BaseFieldInfo(w=45, description="VALOR DO ISSQN", content=v_iss),
+            BaseFieldInfo(
+                w=0,
+                description="INSCRIÇÃO MUNICIPAL",
+                content=extract_text(self.emit, "IM"),
+            ),
+            BaseFieldInfo(
+                w=0,
+                description="VALOR TOTAL DOS SERVIÇOS",
+                content=format_optional_number(self.issqn_tot, "vServ"),
+                type="number",
+            ),
+            BaseFieldInfo(
+                w=0,
+                description="BASE DE CÁLCULO DO ISSQN",
+                content=format_optional_number(self.issqn_tot, "vBC"),
+                type="number",
+            ),
+            BaseFieldInfo(
+                w=0,
+                description="VALOR DO ISSQN",
+                content=format_optional_number(self.issqn_tot, "vISS"),
+                type="number",
+            ),
         ]
         block_issqn.add_fields([fields])
         block_issqn.render()
@@ -1531,6 +1855,9 @@ class Danfe(xFPDF):
             continuation_height - HEIGHT_FONT_BLOCK_DESC if continuation_height else 20
         )
         block_adic.rows_heights = (height,)
+        draw_qr_code = self.qr_code_image is not None and not continuation_height
+        if draw_qr_code:
+            block_adic.w -= QR_CODE_BLOCK_WIDTH + QR_CODE_BLOCK_GAP
         if not continuation_height:
             fields = [
                 BaseFieldInfo(
@@ -1551,11 +1878,37 @@ class Danfe(xFPDF):
             ]
         block_adic.add_fields([fields])
         block_adic.render()
+        if draw_qr_code:
+            x_after, y_after = self.get_x(), self.get_y()
+            self._draw_qr_code_block(
+                x=block_adic.x + block_adic.w + QR_CODE_BLOCK_GAP,
+                y=block_adic.y,
+                h=HEIGHT_FONT_BLOCK_DESC + height,
+            )
+            self.set_xy(x=x_after, y=y_after)
 
         add_data_field = block_adic.fields[0]
         add_data_lines = add_data_field.get_content_lines()
         max_add_data_lines = add_data_field.get_max_content_lines()
         return add_data_lines, max_add_data_lines
+
+    def _draw_qr_code_block(self, x, y, h):
+        """QR Code of infNFeSupl/qrCode (NT 2026.010, items 4.4 and 4.5)."""
+        w = QR_CODE_BLOCK_WIDTH
+        self.set_font(self.default_font, "B", 6)
+        self.set_xy(x=x, y=y)
+        self.cell(w=w, h=HEIGHT_FONT_BLOCK_DESC, text="QR CODE", align="C")
+        y_box = y + HEIGHT_FONT_BLOCK_DESC
+        h_box = h - HEIGHT_FONT_BLOCK_DESC
+        self.rect(x=x, y=y_box, w=w, h=h_box)
+        size = min(w, h_box) - 2
+        self.image(
+            self.qr_code_image,
+            x=x + (w - size) / 2,
+            y=y_box + (h_box - size) / 2,
+            w=size,
+            h=size,
+        )
 
     def _draw_footer_stamp(self):
         if not self._has_footer_stamp:

@@ -15,6 +15,8 @@ from brazilfiscalreport.danfe import (
     ReceiptPosition,
     TaxConfiguration,
 )
+from brazilfiscalreport.danfe.danfe import format_rate
+from brazilfiscalreport.danfe.models import LabeledValue
 from tests.conftest import assert_pdf_equal, get_pdf_output_path
 
 
@@ -234,6 +236,131 @@ def test_danfe_reforma_tributaria(tmp_path, load_danfe):
     danfe = load_danfe("nfe_reforma_tributaria.xml")
     pdf_path = get_pdf_output_path("danfe", "danfe_reforma_tributaria")
     assert_pdf_equal(danfe, pdf_path, tmp_path)
+
+
+def test_danfe_rtc(tmp_path, load_danfe):
+    """
+    Layout of NT 2026.010: CRT in the header, IBS/CBS/IS totals, optional
+    FCP/DIFAL and single-phase totals, ISSQN, item taxes (regular and
+    effective rates, IS, IPI, exempt and service items) and QR Code.
+    """
+    danfe = load_danfe("nfe_rtc.xml")
+    pdf_path = get_pdf_output_path("danfe", "danfe_rtc")
+    assert_pdf_equal(danfe, pdf_path, tmp_path)
+
+
+def test_danfe_rtc_landscape(tmp_path, load_xml):
+    xml = load_xml("danfe/nfe_rtc.xml").replace("<tpImp>1</tpImp>", "<tpImp>2</tpImp>")
+    danfe = Danfe(xml=xml)
+    pdf_path = get_pdf_output_path("danfe", "danfe_rtc_landscape")
+    assert_pdf_equal(danfe, pdf_path, tmp_path)
+
+
+def test_danfe_rtc_big_font_size(tmp_path, load_danfe):
+    """
+    With the big font the item taxes no longer fit two per line, so they are
+    printed one per line.
+    """
+    config = DanfeConfig(
+        margins=Margins(top=2, right=2, bottom=2, left=2),
+        font_size=FontSize.BIG,
+    )
+    danfe = load_danfe("nfe_rtc.xml", config=config)
+    pdf_path = get_pdf_output_path("danfe", "danfe_rtc_big_font_size")
+    assert_pdf_equal(danfe, pdf_path, tmp_path)
+
+
+def test_danfe_rtc_item_taxes(load_danfe):
+    products = load_danfe("nfe_rtc.xml").products
+
+    # regular rates
+    assert products[0].tax_bases == [
+        LabeledValue("ICMS", "250,00"),
+        LabeledValue("IBS / CBS", "250,00"),
+        LabeledValue("IPI", "250,00"),
+    ]
+    assert products[0].tax_rates == (
+        [
+            LabeledValue("ICMS", "12,00%"),
+            LabeledValue("IBS UF", "0,10%"),
+            LabeledValue("IBS MUN", "0,00%"),
+        ],
+        [LabeledValue("CBS", "0,90%"), LabeledValue("IPI", "5,00%")],
+    )
+    # with gRed the effective rate (pAliqEfet) is printed
+    assert products[1].tax_rates == (
+        [
+            LabeledValue("ICMS", "12,00%"),
+            LabeledValue("IBS UF", "0,04%"),
+            LabeledValue("IBS MUN", "0,00%"),
+        ],
+        [LabeledValue("CBS", "0,36%"), LabeledValue("IS", "10,00%")],
+    )
+    assert products[1].tax_values == (
+        [
+            LabeledValue("ICMS", "38,40"),
+            LabeledValue("IBS UF", "0,21"),
+            LabeledValue("IBS MUN", "0,00"),
+        ],
+        [LabeledValue("CBS", "1,90"), LabeledValue("IS", "48,00")],
+    )
+    # single-phase ICMS and IBS/CBS, then an exempt item: nothing to print
+    for product in products[2:4]:
+        assert product.tax_bases == []
+        assert product.tax_rates == ([], [])
+        assert product.tax_values == ([], [])
+    assert products[3].description.endswith("[NCM 49019900] [cClassTrib 410001]")
+    # service item: no ICMS group, so no CST
+    assert products[4].cst_cfop == [LabeledValue("CFOP", "6933")]
+
+
+def test_danfe_rtc_totals(load_danfe):
+    danfe = load_danfe("nfe_rtc.xml")
+    assert len(danfe._get_icms_ipi_lines()) == 3
+    assert danfe._get_ibs_cbs_is_lines() == [
+        [
+            ("VALOR DA CBS", "6,85"),
+            ("VALOR DO IBS UF", "0,76"),
+            ("VALOR DO IBS MUNICÍPIO", "0,00"),
+            ("VALOR DO IMPOSTO SELETIVO", "48,00"),
+        ],
+        [
+            ("VALOR DO IBS MONOFÁSICO", "2,50"),
+            ("VALOR DA CBS MONOFÁSICA", "22,50"),
+            ("VALOR DO IBS MONOFÁSICO POR RETENÇÃO", "0,00"),
+            ("VALOR DA CBS MONOFÁSICA POR RETENÇÃO", "0,00"),
+        ],
+    ]
+
+
+def test_danfe_without_rtc_totals(load_danfe):
+    """
+    Information absent from the XML is left blank instead of printed as
+    zero, and the optional lines are omitted (NT 2026.010, item 4.4).
+    """
+    danfe = load_danfe("nfe_test_1.xml")
+    assert len(danfe._get_icms_ipi_lines()) == 1
+    assert danfe._get_ibs_cbs_is_lines() == [
+        [
+            ("VALOR DA CBS", ""),
+            ("VALOR DO IBS UF", ""),
+            ("VALOR DO IBS MUNICÍPIO", ""),
+            ("VALOR DO IMPOSTO SELETIVO", ""),
+        ]
+    ]
+
+
+@pytest.mark.parametrize(
+    "rate, expected",
+    [
+        ("12.0000", "12,00%"),
+        ("0.1", "0,10%"),
+        ("8.6625", "8,6625%"),
+        ("", ""),
+    ],
+)
+def test_format_rate(rate, expected):
+    assert format_rate(rate) == expected
 
 
 def test_danfe_big_font_size(tmp_path, load_danfe):

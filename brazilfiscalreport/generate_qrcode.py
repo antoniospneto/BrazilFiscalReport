@@ -1,6 +1,20 @@
 import qrcode
 
 
+def make_qr_code_image(qr_code_data, box_size=10, border=1):
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=box_size,
+        border=border,
+    )
+    qr.add_data(qr_code_data)
+    qr.make(fit=True)
+
+    qr_img = qr.make_image(fill_color="black", back_color="white")
+    return qr_img.get_image()
+
+
 def draw_qr_code(
     self,
     qr_code_data,
@@ -20,17 +34,7 @@ def draw_qr_code(
     e, quando omitido, mantém o comportamento antigo.
     """
     size = box_size if size is None else size
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=box_size,
-        border=border,
-    )
-    qr.add_data(qr_code_data)
-    qr.make(fit=True)
-
-    qr_img = qr.make_image(fill_color="black", back_color="white")
-    qr_img_bytes = qr_img.get_image()
+    qr_img_bytes = make_qr_code_image(qr_code_data, box_size=box_size, border=border)
 
     num_x = y_margin_ret + x_offset
     num_y = self.t_margin + y_offset

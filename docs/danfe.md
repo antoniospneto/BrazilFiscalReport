@@ -2,6 +2,8 @@ DANFE (Auxiliary Document of the Electronic Invoice) is a printed representation
 
 ![Example of a DANFE generated from an NF-e XML](assets/screenshots/danfe.png){ width="480" }
 
+The layout follows the reference model of Technical Note **NT 2026.010 (DANFE Reforma Tributária)**, which adds the IBS, CBS and Selective Tax (IS) of the Brazilian consumption tax reform (RTC) to the DANFE.
+
 [Try it online with a sample XML :material-arrow-right:](https://brazilfiscalreport.streamlit.app/?exemplo=danfe){ .md-button }
 
 ## Basic Usage
@@ -300,3 +302,13 @@ config = DanfeConfig(
 danfe = Danfe(xml_content, config=config)
 danfe.output('output_danfe.pdf')
 ```
+
+## Layout notes
+
+- The header shows the **Código do Regime Tributário** (`CRT`) and reserves the **Tipo de Regime de Apuração do IBS e da CBS** field, which stays blank until a future NT defines its XML tag (NT 2026.010, item 4.2).
+- The totals are split in **Total dos Produtos e Total da Nota**, **Total do ICMS / IPI** and **Total do IBS / CBS / IS** (item 4.1). The FCP/DIFAL and single-phase ICMS lines are printed only when one of their values is not zero, and the single-phase IBS/CBS line only when the `gMono` group is informed (item 4.4).
+- The **Cálculo do ISSQN** block comes before the carrier block and is printed only when `ISSQNtot` is informed; the carrier address and volume lines are printed only when the NF-e has them.
+- Each item shows the CST/CFOP, the NCM and the `cClassTrib` at the bottom of the description, and the **bases, rates and values** of ICMS, IBS UF, IBS Município, CBS, IPI and IS (item 4.3). Only the taxes informed in the item are listed; rates and values are printed two per line (ICMS / CBS, IBS UF / IPI, IBS MUN / IS) when they fit, otherwise one per line.
+- When the `gRed` group is informed (rate reduction or government purchase), the effective rate `pAliqEfet` is printed for IBS UF, IBS Município and CBS instead of the regular rate.
+- Values absent from the XML are left blank instead of being printed as zero (item 4.4).
+- When the XML has `infNFeSupl/qrCode`, a **QR Code** box is printed beside **Dados Adicionais** (item 4.5).

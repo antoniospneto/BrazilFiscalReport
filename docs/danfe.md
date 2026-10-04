@@ -107,7 +107,7 @@ Here is a breakdown of all the configuration options available in `DanfeConfig`:
 - **Default**: `TOP` when portrait, `LEFT` when landscape orientation.
 
 !!! note
-    The page orientation is determined automatically by the `tpImp` tag of the NF-e XML (`1` = portrait, otherwise landscape) and is not configurable. In landscape orientation, the receipt position is forced to the far left; customization is not permitted.
+    The page orientation is determined automatically by the `tpImp` tag of the NF-e XML (`2` = landscape, any other value = portrait) and is not configurable. In landscape orientation, the receipt position is forced to the far left; customization is not permitted.
 
 ---
 

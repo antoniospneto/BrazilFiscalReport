@@ -107,7 +107,7 @@ Aqui está uma descrição de todas as opções de configuração disponíveis e
 - **Padrão**: `TOP` quando retrato, `LEFT` quando orientação paisagem.
 
 !!! note
-    A orientação da página é determinada automaticamente pela tag `tpImp` do XML da NF-e (`1` = retrato, caso contrário paisagem) e não é configurável. Na orientação paisagem, a posição do recibo é forçada para o lado esquerdo; personalização não é permitida.
+    A orientação da página é determinada automaticamente pela tag `tpImp` do XML da NF-e (`2` = paisagem, qualquer outro valor = retrato) e não é configurável. Na orientação paisagem, a posição do recibo é forçada para o lado esquerdo; personalização não é permitida.
 
 ---
 

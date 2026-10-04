@@ -256,6 +256,29 @@ def test_danfe_rtc_landscape(tmp_path, load_xml):
     assert_pdf_equal(danfe, pdf_path, tmp_path)
 
 
+@pytest.mark.parametrize(
+    "tp_imp, orientation",
+    [
+        ("0", "P"),
+        ("1", "P"),
+        ("2", "L"),
+        ("3", "P"),
+        ("4", "P"),
+        ("5", "P"),
+        ("6", "P"),
+    ],
+)
+def test_danfe_orientation_by_tp_imp(load_xml, tp_imp, orientation):
+    """
+    Only tpImp=2 is the landscape DANFE; the other formats, including the
+    DANFE Simplificado Tipo 2 (tpImp=6), print the regular DANFE in portrait.
+    """
+    xml = load_xml("danfe/nfe_rtc.xml").replace(
+        "<tpImp>1</tpImp>", f"<tpImp>{tp_imp}</tpImp>"
+    )
+    assert Danfe(xml=xml).orientation == orientation
+
+
 def test_danfe_rtc_big_font_size(tmp_path, load_danfe):
     """
     With the big font the item taxes no longer fit two per line, so they are

@@ -7,7 +7,12 @@ HEIGHT_FONT_BLOCK_DESC = 3
 PRODUCT_LINE_HEIGHT = 2.5
 PRODUCT_HEADER_LINE_HEIGHT = 2.2
 PRODUCT_CELL_PADDING = 0.5
-# QR Code box printed beside "DADOS ADICIONAIS" (NT 2026.010, item 4.5).
+# QR Code box printed beside "DADOS ADICIONAIS" (NT 2026.010, item 4.5). The
+# size follows the only rule published so far for the QR Code of the NF-e
+# model 55 (NT 2026.003, item 3.4): 22 mm of code inside a box of at least
+# 25 x 25 mm, the rest being the quiet zone.
+QR_CODE_SIZE = 22
+QR_CODE_BOX_SIZE = 25
 QR_CODE_BLOCK_WIDTH = 26
 QR_CODE_BLOCK_GAP = 2
 BASE_FONT_SIZES = {

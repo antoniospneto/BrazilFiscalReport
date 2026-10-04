@@ -7,6 +7,7 @@ from itertools import zip_longest
 from xml.etree.ElementTree import Element
 
 from fpdf.enums import MethodReturnValue
+from qrcode.constants import ERROR_CORRECT_M
 
 from ..generate_qrcode import make_qr_code_image
 from ..utils import (
@@ -33,6 +34,8 @@ from .danfe_conf import (
     PRODUCT_LINE_HEIGHT,
     QR_CODE_BLOCK_GAP,
     QR_CODE_BLOCK_WIDTH,
+    QR_CODE_BOX_SIZE,
+    QR_CODE_SIZE,
     URL,
 )
 from .danfe_emit_info import DanfeEmitInfo
@@ -153,7 +156,13 @@ class Danfe(xFPDF):
         self.issqn_tot = root.find(f"{URL}ISSQNtot")
         self.crt = extract_text(self.emit, "CRT")
         qr_code = (extract_text(root, "qrCode") or "").strip()
-        self.qr_code_image = make_qr_code_image(qr_code) if qr_code else None
+        self.qr_code_image = None
+        if qr_code:
+            # no quiet zone in the image: the box around it provides one;
+            # error correction level M as in NT 2026.003, item 4.4.2
+            self.qr_code_image = make_qr_code_image(
+                qr_code, border=0, error_correction=ERROR_CORRECT_M
+            )
 
         self.total_receipt_height = 19  # TODO need compute
 
@@ -1857,10 +1866,11 @@ class Danfe(xFPDF):
         height = (
             continuation_height - HEIGHT_FONT_BLOCK_DESC if continuation_height else 20
         )
-        block_adic.rows_heights = (height,)
         draw_qr_code = self.qr_code_image is not None and not continuation_height
         if draw_qr_code:
             block_adic.w -= QR_CODE_BLOCK_WIDTH + QR_CODE_BLOCK_GAP
+            height = max(height, QR_CODE_BOX_SIZE)
+        block_adic.rows_heights = (height,)
         if not continuation_height:
             fields = [
                 BaseFieldInfo(
@@ -1904,13 +1914,12 @@ class Danfe(xFPDF):
         y_box = y + HEIGHT_FONT_BLOCK_DESC
         h_box = h - HEIGHT_FONT_BLOCK_DESC
         self.rect(x=x, y=y_box, w=w, h=h_box)
-        size = min(w, h_box) - 2
         self.image(
             self.qr_code_image,
-            x=x + (w - size) / 2,
-            y=y_box + (h_box - size) / 2,
-            w=size,
-            h=size,
+            x=x + (w - QR_CODE_SIZE) / 2,
+            y=y_box + (h_box - QR_CODE_SIZE) / 2,
+            w=QR_CODE_SIZE,
+            h=QR_CODE_SIZE,
         )
 
     def _draw_footer_stamp(self):

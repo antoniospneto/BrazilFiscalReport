@@ -1,10 +1,15 @@
 import qrcode
 
 
-def make_qr_code_image(qr_code_data, box_size=10, border=1):
+def make_qr_code_image(
+    qr_code_data,
+    box_size=10,
+    border=1,
+    error_correction=qrcode.constants.ERROR_CORRECT_L,
+):
     qr = qrcode.QRCode(
         version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        error_correction=error_correction,
         box_size=box_size,
         border=border,
     )

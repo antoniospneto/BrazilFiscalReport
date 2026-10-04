@@ -311,4 +311,4 @@ danfe.output('output_danfe.pdf')
 - Cada item exibe o CST/CFOP, o NCM e o `cClassTrib` no rodapé da descrição, e as **bases, alíquotas e valores** de ICMS, IBS UF, IBS Município, CBS, IPI e IS (item 4.3). Só os tributos informados no item são listados; alíquotas e valores são impressos dois por linha (ICMS / CBS, IBS UF / IPI, IBS MUN / IS) quando cabem, senão um por linha.
 - Quando o grupo `gRed` é informado (redução de alíquota ou compra governamental), é impressa a alíquota efetiva `pAliqEfet` do IBS UF, do IBS Município e da CBS no lugar da alíquota vigente.
 - Valores ausentes do XML ficam em branco em vez de impressos como zero (item 4.4).
-- Quando o XML possui `infNFeSupl/qrCode`, um quadro de **QR Code** é impresso ao lado de **Dados Adicionais** (item 4.5).
+- Quando o XML possui `infNFeSupl/qrCode`, um quadro de **QR Code** é impresso ao lado de **Dados Adicionais** (item 4.5). Enquanto as regras do QR Code do DANFE comum não são publicadas, ele segue a NT 2026.003 (DANFE Simplificado Tipo 2): 22 mm de código num quadro de 25 x 25 mm e nível de correção de erros M.

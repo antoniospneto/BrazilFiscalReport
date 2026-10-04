@@ -508,7 +508,7 @@
       </infAdic>
     </infNFe>
     <infNFeSupl>
-      <qrCode><![CDATA[https://www.fazenda.pr.gov.br/nfe/qrcode?p=41261212345678000195550010000012341202612019|2|1|1|3A1D0F6C8B9E4F2A7C5D3B1E9F8A6C4D2E0B7A95]]></qrCode>
+      <qrCode><![CDATA[https://www.fazenda.pr.gov.br/nfe/qrcode?p=41261212345678000195550010000012341202612019|3|1]]></qrCode>
       <urlChave>http://www.fazenda.pr.gov.br/nfe/consulta</urlChave>
     </infNFeSupl>
     <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">

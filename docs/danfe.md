@@ -311,4 +311,4 @@ danfe.output('output_danfe.pdf')
 - Each item shows the CST/CFOP, the NCM and the `cClassTrib` at the bottom of the description, and the **bases, rates and values** of ICMS, IBS UF, IBS Município, CBS, IPI and IS (item 4.3). Only the taxes informed in the item are listed; rates and values are printed two per line (ICMS / CBS, IBS UF / IPI, IBS MUN / IS) when they fit, otherwise one per line.
 - When the `gRed` group is informed (rate reduction or government purchase), the effective rate `pAliqEfet` is printed for IBS UF, IBS Município and CBS instead of the regular rate.
 - Values absent from the XML are left blank instead of being printed as zero (item 4.4).
-- When the XML has `infNFeSupl/qrCode`, a **QR Code** box is printed beside **Dados Adicionais** (item 4.5).
+- When the XML has `infNFeSupl/qrCode`, a **QR Code** box is printed beside **Dados Adicionais** (item 4.5). While the rules for the QR Code of the regular DANFE are not published, it follows NT 2026.003 (DANFE Simplificado Tipo 2): 22 mm of code inside a 25 x 25 mm box and error correction level M.

@@ -64,6 +64,10 @@ RECEIPT_DEFAULT = "default"
 RECEIPT_COLLECTION = "collection"
 RECEIPT_DELIVERY = "delivery"
 
+# Segment alignment that marks the gap between the two columns of a cell of
+# the product table: drawn as a vertical line instead of text.
+COLUMN_SEPARATOR = "column_separator"
+
 
 def extract_text(node: Element, tag: str) -> str:
     return get_tag_text(node, URL, tag)
@@ -1702,7 +1706,7 @@ class Danfe(xFPDF):
         ) = inner_widths
 
         # ALÍQUOTAS and VALOR DOS TRIBUTOS share the same order of taxes, so
-        # both are printed two per line only when both fit that way.
+        # both are printed in two columns only when both fit that way.
         tax_rates = self._labeled_lines_paired(*product.tax_rates, w_rates)
         tax_values = self._labeled_lines_paired(*product.tax_values, w_values)
         if tax_rates is None or tax_values is None:
@@ -1727,12 +1731,19 @@ class Danfe(xFPDF):
         for w, lines in zip(col_widths, cells, strict=True):
             self.rect(x=x, y=y, w=w, h=height)
             x_inner = x + PRODUCT_CELL_PADDING
+            separators = set()
             for i, segments in enumerate(lines):
                 y_line = y + PRODUCT_CELL_PADDING + i * line_h
                 for x_offset, w_segment, text, align in segments:
-                    if text:
+                    if align == COLUMN_SEPARATOR:
+                        separators.add(x_inner + x_offset + w_segment / 2)
+                    elif text:
                         self.set_xy(x=x_inner + x_offset, y=y_line)
                         self.cell(w=w_segment, h=line_h, text=text, align=align)
+            if separators:
+                with self.local_context(line_width=0.1):
+                    for x_separator in separators:
+                        self.line(x_separator, y, x_separator, y + height)
             x += w
         self.set_xy(x=x - sum(col_widths), y=y + height)
         return height
@@ -1757,24 +1768,14 @@ class Danfe(xFPDF):
     def _labeled_width(self, item):
         width = self.get_string_width(item.label)
         if item.value:
-            # at least one dot between the label and the value
-            width += self.get_string_width(".") + self.get_string_width(item.value)
+            # at least one space between the label and the value
+            width += self.get_string_width(" ") + self.get_string_width(item.value)
         return width
 
-    def _labeled_segments(self, item, x, width):
-        """
-        Label on the left and value on the right, joined by dot leaders, as
-        in "ICMS.......1.234,56".
-        """
-        label = item.label
-        if item.value:
-            free_width = (
-                width
-                - self.get_string_width(item.label)
-                - self.get_string_width(item.value)
-            )
-            label += "." * max(int(free_width / self.get_string_width(".")), 0)
-        return [(x, width, label, "L"), (x, width, item.value, "R")]
+    @staticmethod
+    def _labeled_segments(item, x, width):
+        """Label on the left and value on the right, as in "ICMS   1.234,56"."""
+        return [(x, width, item.label, "L"), (x, width, item.value, "R")]
 
     def _labeled_lines(self, items, width):
         """One labeled value per line; the value wraps if it does not fit."""
@@ -1790,11 +1791,13 @@ class Danfe(xFPDF):
 
     def _labeled_lines_paired(self, lefts, rights, width):
         """
-        Two columns of labeled values, as in "ICMS....12,00% / CBS....0,90%".
-        Return None when they do not fit in `width`.
+        Two columns of labeled values split by a vertical line, as in
+        "ICMS  12,00% | CBS  0,90%". Return None when they do not fit in `width`.
         """
-        separator = " / "
-        w_separator = self.get_string_width(separator)
+        if not lefts or not rights:
+            # a single column: no line, values on the right edge
+            return self._labeled_lines(lefts or rights, width)
+        w_separator = self.get_string_width(" " * 3)
         w_left = max((self._labeled_width(item) for item in lefts), default=0)
         w_right = max((self._labeled_width(item) for item in rights), default=0)
         slack = width - w_left - w_separator - w_right
@@ -1808,7 +1811,7 @@ class Danfe(xFPDF):
             if left is not None:
                 segments += self._labeled_segments(left, 0, w_left)
             if left is not None and right is not None:
-                segments.append((w_left, w_separator, separator, "C"))
+                segments.append((w_left, w_separator, "", COLUMN_SEPARATOR))
             if right is not None:
                 segments += self._labeled_segments(right, x_right, width - x_right)
             lines.append(segments)

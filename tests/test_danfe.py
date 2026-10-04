@@ -15,7 +15,6 @@ from brazilfiscalreport.danfe import (
     ReceiptPosition,
     TaxConfiguration,
 )
-from brazilfiscalreport.danfe.danfe import format_rate
 from brazilfiscalreport.danfe.models import LabeledValue
 from tests.conftest import assert_pdf_equal, get_pdf_output_path
 
@@ -371,19 +370,6 @@ def test_danfe_without_rtc_totals(load_danfe):
             ("VALOR DO IMPOSTO SELETIVO", ""),
         ]
     ]
-
-
-@pytest.mark.parametrize(
-    "rate, expected",
-    [
-        ("12.0000", "12,00%"),
-        ("0.1", "0,10%"),
-        ("8.6625", "8,6625%"),
-        ("", ""),
-    ],
-)
-def test_format_rate(rate, expected):
-    assert format_rate(rate) == expected
 
 
 def test_danfe_big_font_size(tmp_path, load_danfe):

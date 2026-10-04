@@ -16,6 +16,7 @@ from ..utils import (
     format_cpf_cnpj,
     format_number,
     format_phone,
+    format_rate,
     get_date_utc,
     get_tag_text,
     merge_if_different,
@@ -76,15 +77,6 @@ def format_optional_number(node: Element, tag: str, precision: int = 2) -> str:
     """
     text = extract_text(node, tag)
     return format_number(text, precision) if text else ""
-
-
-def format_rate(rate: str) -> str:
-    """Format a tax rate with 2 to 4 decimals, e.g. 12,00% or 8,6625%."""
-    formatted = format_number(rate, precision=4) if rate else ""
-    if not formatted:
-        return ""
-    integer, decimals = formatted.split(",")
-    return f"{integer},{decimals.rstrip('0'):0<2}%"
 
 
 def interleave(lefts, rights):

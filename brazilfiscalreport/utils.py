@@ -91,6 +91,15 @@ def format_number(cNumber, precision=0, group_sep=".", decimal_sep=","):
     return number
 
 
+def format_rate(rate):
+    """Format a tax rate with 2 to 4 decimals, e.g. 12,00% or 8,6625%."""
+    formatted = format_number(rate, precision=4) if rate else ""
+    if not formatted:
+        return ""
+    integer, decimals = formatted.split(",")
+    return f"{integer},{decimals.rstrip('0'):0<2}%"
+
+
 def merge_if_different(value1, value2):
     str_val1 = str(value1).lower()
     str_val2 = str(value2).lower()

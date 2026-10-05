@@ -275,3 +275,26 @@ def test_dacte_rtc_sem_flag_nao_imprime_bloco_ibscbs(load_xml, tmp_path):
     com = Dacte(xml=xml)
     sem = Dacte(xml=_sem_tags(xml, "IBSCBS", "vTPrestLiq", "vTotDFe"))
     assert_pdf_equal(com, sem, tmp_path)
+
+
+def test_dacte_rtc_2027_pdf(tmp_path, load_dacte):
+    dacte = load_dacte("dacte_rtc_2027.xml", config=DacteConfig(display_ibs_cbs=True))
+    pdf_path = get_pdf_output_path("dacte", "dacte_rtc_2027")
+    assert_pdf_equal(dacte, pdf_path, tmp_path)
+
+
+def test_dacte_rtc_2027_gred_pdf(tmp_path, load_dacte):
+    dacte = load_dacte(
+        "dacte_rtc_2027_gred.xml", config=DacteConfig(display_ibs_cbs=True)
+    )
+    pdf_path = get_pdf_output_path("dacte", "dacte_rtc_2027_gred")
+    assert_pdf_equal(dacte, pdf_path, tmp_path)
+
+
+def test_dacte_rtc_sem_ibscbs_pdf(tmp_path, load_dacte):
+    """Flag ligada e XML sem IBSCBS: bloco com valores em branco."""
+    dacte = load_dacte(
+        "dacte_rtc_sem_ibscbs.xml", config=DacteConfig(display_ibs_cbs=True)
+    )
+    pdf_path = get_pdf_output_path("dacte", "dacte_rtc_sem_ibscbs")
+    assert_pdf_equal(dacte, pdf_path, tmp_path)

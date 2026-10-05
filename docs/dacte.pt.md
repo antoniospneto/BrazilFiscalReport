@@ -86,6 +86,7 @@ Aqui está uma descrição de todas as opções de configuração disponíveis e
     config.display_ibs_cbs = True
     ```
 - **Padrão**: `False`
+- **Notas da Reforma Tributária** (NT 2026.004 v1.00): a NT altera apenas o leiaute do XML e não muda a impressão do DACTE, então os campos novos (`vTPrestLiq`, `vTotDFe`) não são impressos. O "VALOR TOTAL DO SERVIÇO" é sempre o `vTPrest`, que a partir de 2027 já inclui IBS e CBS. Valores ausentes no XML ficam em branco (nunca `0,00`). Quando a alíquota tem redução (`gRed`), o percentual impresso é a alíquota efetiva (`pAliqEfet`). As colunas de ICMS são lidas somente de `imp/ICMS`, nunca do grupo `IBSCBS`.
 
 ---
 

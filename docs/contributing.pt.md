@@ -2,6 +2,8 @@
 
 Contribuições são bem-vindas! Veja como configurar o projeto para desenvolvimento.
 
+A [demo online](https://brazilfiscalreport.streamlit.app) fica num repositório próprio, o [Engenere/bfrep-demo](https://github.com/Engenere/bfrep-demo).
+
 ## Configuração do Ambiente de Desenvolvimento
 
 A biblioteca suporta Python 3.10+ (o CI testa do 3.10 ao 3.14), então mantenha o código compatível com 3.10.
@@ -22,9 +24,6 @@ A biblioteca suporta Python 3.10+ (o CI testa do 3.10 ao 3.14), então mantenha 
     pip install -e '.[dacte,damdfe,danfse,cli]'
     pip install pytest pytest-cov ruff
     ```
-
-    !!! note
-        O `requirements.txt` da raiz pertence ao app demo Streamlit (`streamlit_app.py`), não ao desenvolvimento da biblioteca — use a instalação editável acima.
 
 3. Instale os hooks do pre-commit:
 

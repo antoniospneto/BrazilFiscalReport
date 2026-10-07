@@ -2,6 +2,8 @@ DANFSe (Documento Auxiliar da NFS-e) é um documento impresso usado no Brasil pa
 
 ![Exemplo de DANFSe gerado a partir do XML de NFS-e](assets/screenshots/danfse.png){ width="480" }
 
+[Teste online com um XML de exemplo :material-arrow-right:](https://brazilfiscalreport.streamlit.app/?exemplo=danfse){ .md-button }
+
 !!! note "Leiaute de XML suportado"
     O XML aceito é o da NFS-e no **Padrão Nacional** (Sistema Nacional NFS-e, namespace `http://www.sped.fazenda.gov.br/nfse`). Leiautes municipais ABRASF não são suportados.
 

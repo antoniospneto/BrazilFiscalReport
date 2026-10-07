@@ -2,6 +2,8 @@ DAMDFE (Documento Auxiliar do Manifesto Eletrônico de Documentos Fiscais) é um
 
 ![Exemplo de DAMDFE gerado a partir do XML de MDF-e](assets/screenshots/damdfe.png){ width="480" }
 
+[Teste online com um XML de exemplo :material-arrow-right:](https://brazilfiscalreport.streamlit.app/?exemplo=damdfe){ .md-button }
+
 ## Uso Básico
 
 === "Python"

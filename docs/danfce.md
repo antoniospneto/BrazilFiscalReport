@@ -1,5 +1,7 @@
 DANFCe (Auxiliary Document of the Electronic Consumer Invoice) is the receipt printed for the NFC-e (NF-e model 65), the invoice issued in over-the-counter retail sales. It is laid out for non-fiscal thermal printers, following the *Manual de Especificações Técnicas do DANFE NFC-e / QR Code*.
 
+[Try it online with a sample XML :material-arrow-right:](https://brazilfiscalreport.streamlit.app/?exemplo=danfce){ .md-button }
+
 ## Basic Usage
 
 === "Python"

@@ -2,6 +2,8 @@ DANFSe (Auxiliary Document of the Electronic Service Invoice) is a printed docum
 
 ![Example of a DANFSe generated from an NFS-e XML](assets/screenshots/danfse.png){ width="480" }
 
+[Try it online with a sample XML :material-arrow-right:](https://brazilfiscalreport.streamlit.app/?exemplo=danfse){ .md-button }
+
 The layout follows the **DANFSe v2.0** model defined by Technical Note **NT 008/2026 (SE/CGNFS-e)**, including the Recipient (Destinatário), IBS/CBS taxation and optional acknowledgment stub (canhoto) blocks introduced by the Brazilian consumption tax reform (RTC).
 
 ## Basic Usage

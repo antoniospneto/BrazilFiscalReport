@@ -2,6 +2,8 @@ DANFE (Auxiliary Document of the Electronic Invoice) is a printed representation
 
 ![Example of a DANFE generated from an NF-e XML](assets/screenshots/danfe.png){ width="480" }
 
+[Try it online with a sample XML :material-arrow-right:](https://brazilfiscalreport.streamlit.app/?exemplo=danfe){ .md-button }
+
 ## Basic Usage
 
 === "Python"

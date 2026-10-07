@@ -2,6 +2,8 @@ DACTE (Auxiliary Document of the Electronic Transportation Bill) is a printed do
 
 ![Example of a DACTE generated from a CT-e XML](assets/screenshots/dacte.png){ width="480" }
 
+[Try it online with a sample XML :material-arrow-right:](https://brazilfiscalreport.streamlit.app/?exemplo=dacte){ .md-button }
+
 ## Basic Usage
 
 === "Python"

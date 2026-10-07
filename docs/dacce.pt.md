@@ -2,6 +2,8 @@ DACCe (Documento Auxiliar da Carta de Correção Eletrônica) é uma representa�
 
 ![Exemplo de DACCe gerado a partir do XML de CC-e](assets/screenshots/dacce.png){ width="480" }
 
+[Teste online com um XML de exemplo :material-arrow-right:](https://brazilfiscalreport.streamlit.app/?exemplo=dacce){ .md-button }
+
 ## Uso Básico
 
 === "Python"

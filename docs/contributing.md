@@ -2,6 +2,8 @@
 
 Contributions are welcome! Here's how to set up the project for development.
 
+The [online demo](https://brazilfiscalreport.streamlit.app) lives in its own repository, [Engenere/bfrep-demo](https://github.com/Engenere/bfrep-demo).
+
 ## Development Setup
 
 The library supports Python 3.10+ (the CI tests 3.10 through 3.14), so keep the code compatible with 3.10.
@@ -22,9 +24,6 @@ The library supports Python 3.10+ (the CI tests 3.10 through 3.14), so keep the 
     pip install -e '.[dacte,damdfe,danfse,cli]'
     pip install pytest pytest-cov ruff
     ```
-
-    !!! note
-        The root `requirements.txt` belongs to the Streamlit demo app (`streamlit_app.py`), not to library development — use the editable install above.
 
 3. Install pre-commit hooks:
 

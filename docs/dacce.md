@@ -2,6 +2,8 @@ DACCe (Auxiliary Document of the Electronic Correction Letter) is a printed repr
 
 ![Example of a DACCe generated from a CC-e XML](assets/screenshots/dacce.png){ width="480" }
 
+[Try it online with a sample XML :material-arrow-right:](https://brazilfiscalreport.streamlit.app/?exemplo=dacce){ .md-button }
+
 ## Basic Usage
 
 === "Python"

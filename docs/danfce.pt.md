@@ -1,5 +1,7 @@
 O DANFCe (Documento Auxiliar da Nota Fiscal de Consumidor Eletrônica) é o cupom impresso da NFC-e (NF-e modelo 65), emitida na venda presencial ao consumidor. O leiaute é pensado para impressoras térmicas não fiscais e segue o *Manual de Especificações Técnicas do DANFE NFC-e / QR Code*.
 
+[Teste online com um XML de exemplo :material-arrow-right:](https://brazilfiscalreport.streamlit.app/?exemplo=danfce){ .md-button }
+
 ## Uso Básico
 
 === "Python"

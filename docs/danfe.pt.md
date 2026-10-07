@@ -2,6 +2,8 @@ DANFE (Documento Auxiliar da Nota Fiscal Eletrônica) é uma representação imp
 
 ![Exemplo de DANFE gerado a partir do XML de NF-e](assets/screenshots/danfe.png){ width="480" }
 
+[Teste online com um XML de exemplo :material-arrow-right:](https://brazilfiscalreport.streamlit.app/?exemplo=danfe){ .md-button }
+
 ## Uso Básico
 
 === "Python"

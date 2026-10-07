@@ -2,6 +2,8 @@ DACTE (Documento Auxiliar do Conhecimento de Transporte Eletrônico) é um docum
 
 ![Exemplo de DACTE gerado a partir do XML de CT-e](assets/screenshots/dacte.png){ width="480" }
 
+[Teste online com um XML de exemplo :material-arrow-right:](https://brazilfiscalreport.streamlit.app/?exemplo=dacte){ .md-button }
+
 ## Uso Básico
 
 === "Python"

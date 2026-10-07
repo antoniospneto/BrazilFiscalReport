@@ -69,7 +69,7 @@ danfe.output("danfe.pdf")
 ```
 
 !!! tip "Sem um XML em mãos?"
-    Pegue um exemplo em [tests/fixtures](https://github.com/Engenere/BrazilFiscalReport/tree/main/tests/fixtures) ou [teste a demo online](https://brazilfiscalreport.streamlit.app) com o seu próprio arquivo.
+    Pegue um exemplo em [tests/fixtures](https://github.com/Engenere/BrazilFiscalReport/tree/main/tests/fixtures) ou [teste a demo online](https://brazilfiscalreport.streamlit.app), que também tem exemplos prontos.
 
 O mesmo padrão se aplica a todos os tipos de documentos:
 

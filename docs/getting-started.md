@@ -69,7 +69,7 @@ danfe.output("danfe.pdf")
 ```
 
 !!! tip "No XML at hand?"
-    Grab a sample from [tests/fixtures](https://github.com/Engenere/BrazilFiscalReport/tree/main/tests/fixtures) or [try the online demo](https://brazilfiscalreport.streamlit.app) with your own file.
+    Grab a sample from [tests/fixtures](https://github.com/Engenere/BrazilFiscalReport/tree/main/tests/fixtures) or [try the online demo](https://brazilfiscalreport.streamlit.app), which also has ready-made samples.
 
 The same pattern applies to all document types:
 

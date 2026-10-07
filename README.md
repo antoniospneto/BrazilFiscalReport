@@ -104,7 +104,7 @@ danfe.output("danfe.pdf")
 
 See the [documentation](https://engenere.github.io/BrazilFiscalReport/) for every option — watermarks, decimal precision, receipt position and more.
 
-> 🚀 **No setup?** [Try it online](https://brazilfiscalreport.streamlit.app) — upload your fiscal XML, download the PDF.
+> 🚀 **No setup?** [Try it online](https://brazilfiscalreport.streamlit.app) — upload your fiscal XML or pick a sample, then download the PDF.
 
 ## CLI
 

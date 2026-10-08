@@ -221,8 +221,8 @@ Aqui está uma descrição de todas as opções de configuração disponíveis e
 **Configuração da Descrição do Produto**
 
 - **Tipo**: `ProductDescriptionConfig`
-- **Campos**: `display_branch` (`bool`), `display_anp` (`bool`), `display_anvisa` (`bool`), `branch_info_prefix` (`str`), `display_additional_info` (`bool`)
-- **Descrição**: Controla quais informações adicionais são exibidas na coluna de descrição do produto do DANFE.
+- **Campos**: `display_branch` (`bool`), `display_anp` (`bool`), `display_anvisa` (`bool`), `branch_info_prefix` (`str`), `display_additional_info` (`bool`), `display_xped` (`bool`)
+- **Descrição**: Controla quais informações adicionais são exibidas na coluna de descrição do produto do DANFE. O `display_xped` imprime o pedido de compra do item (`xPed`, e o `nItemPed` quando houver), por exemplo "Pedido: 4500012345 Item: 10".
 - **Exemplo**:
     ```python
     config.product_description_config = ProductDescriptionConfig(
@@ -231,6 +231,7 @@ Aqui está uma descrição de todas as opções de configuração disponíveis e
         display_additional_info=True,
         display_anp=True,
         display_anvisa=True,
+        display_xped=True,
     )
     ```
 - **Padrão**:
@@ -241,6 +242,7 @@ Aqui está uma descrição de todas as opções de configuração disponíveis e
         display_anvisa=False,
         branch_info_prefix="",
         display_additional_info=True,
+        display_xped=False,
     )
     ```
 

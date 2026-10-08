@@ -198,6 +198,37 @@ def test_danfe_product_description_with_anvisa(tmp_path, load_danfe):
     assert_pdf_equal(danfe, pdf_path, tmp_path)
 
 
+def test_danfe_product_description_with_xped(tmp_path, load_danfe):
+    config = DanfeConfig(
+        margins=Margins(top=2, right=2, bottom=2, left=2),
+        product_description_config=ProductDescriptionConfig(display_xped=True),
+    )
+    danfe = load_danfe("nfe_xped.xml", config=config)
+    pdf_path = get_pdf_output_path("danfe_moc_7_0", "danfe_xped")
+    assert_pdf_equal(danfe, pdf_path, tmp_path)
+
+
+@pytest.mark.parametrize(
+    "display_xped, n_item_ped, line",
+    [
+        (True, "<nItemPed>10</nItemPed>", "Pedido: 4500012345 Item: 10"),
+        (True, "", "Pedido: 4500012345"),
+        (False, "<nItemPed>10</nItemPed>", None),
+    ],
+)
+def test_danfe_xped_in_description(load_xml, display_xped, n_item_ped, line):
+    """The purchase order (xPed and nItemPed) is printed only when enabled."""
+    xml = load_xml("danfe/nfe_xped.xml").replace("<nItemPed>10</nItemPed>", n_item_ped)
+    config = DanfeConfig(
+        product_description_config=ProductDescriptionConfig(display_xped=display_xped),
+    )
+    lines = Danfe(xml=xml, config=config).products[0].description.splitlines()
+    if line:
+        assert line in lines
+    else:
+        assert not [text for text in lines if text.startswith("Pedido:")]
+
+
 def test_danfe_with_production_environment(tmp_path, load_danfe):
     config = DanfeConfig(
         margins=Margins(top=2, right=2, bottom=2, left=2),

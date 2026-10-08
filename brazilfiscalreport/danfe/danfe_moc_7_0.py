@@ -2,8 +2,9 @@
 # Copyright (C) 2024 Engenere - Antônio S. Pereira Neto <neto@engenere.one>
 
 # DANFE layout of the MOC 7.0 (Anexo II), used for NF-e issued before NT
-# 2026.010 takes effect. Frozen as released in version 1.2.0: it only takes
-# fixes until it is removed, see danfe.py.
+# 2026.010 takes effect. Frozen as released in version 1.2.0: until it is
+# removed (see danfe.py) it only takes fixes and the options shared with the
+# NT 2026.010 layout.
 
 import re
 import xml.etree.ElementTree as ET
@@ -401,6 +402,12 @@ class DanfeMoc70(xFPDF):
             add_infos.append(f"cBenef: {cbenef}")
         if ccredpresumido:
             add_infos.append(f"cCredPresumido: {ccredpresumido}")
+        if self.product_description_config.display_xped:
+            x_ped = extract_text(prod, "xPed")
+            if x_ped:
+                n_item_ped = extract_text(prod, "nItemPed")
+                item = f" Item: {n_item_ped}" if n_item_ped else ""
+                add_infos.append(f"Pedido: {x_ped}{item}")
 
         if self.product_description_config.display_additional_info and inf_ad_prod:
             add_infos.append(inf_ad_prod)

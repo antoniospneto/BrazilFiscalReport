@@ -61,6 +61,7 @@ class ProductDescriptionConfig:
     display_anvisa: bool = False
     branch_info_prefix: str = ""
     display_additional_info: bool = True
+    display_xped: bool = False
 
 
 @dataclass

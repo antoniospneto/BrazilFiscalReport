@@ -441,6 +441,12 @@ class DanfeNt2026010(xFPDF):
             add_infos.append(f"cBenef: {cbenef}")
         if ccredpresumido:
             add_infos.append(f"cCredPresumido: {ccredpresumido}")
+        if self.product_description_config.display_xped:
+            x_ped = extract_text(prod, "xPed")
+            if x_ped:
+                n_item_ped = extract_text(prod, "nItemPed")
+                item = f" Item: {n_item_ped}" if n_item_ped else ""
+                add_infos.append(f"Pedido: {x_ped}{item}")
 
         if self.product_description_config.display_additional_info and inf_ad_prod:
             add_infos.append(inf_ad_prod)

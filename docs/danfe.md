@@ -221,8 +221,8 @@ Here is a breakdown of all the configuration options available in `DanfeConfig`:
 **Product Description Config**
 
 - **Type**: `ProductDescriptionConfig`
-- **Fields**: `display_branch` (`bool`), `display_anp` (`bool`), `display_anvisa` (`bool`), `branch_info_prefix` (`str`), `display_additional_info` (`bool`)
-- **Description**: Controls what additional information is displayed in the product description column of the DANFE.
+- **Fields**: `display_branch` (`bool`), `display_anp` (`bool`), `display_anvisa` (`bool`), `branch_info_prefix` (`str`), `display_additional_info` (`bool`), `display_xped` (`bool`)
+- **Description**: Controls what additional information is displayed in the product description column of the DANFE. `display_xped` prints the purchase order of the item (`xPed`, plus `nItemPed` when present), e.g. "Pedido: 4500012345 Item: 10".
 - **Example**:
     ```python
     config.product_description_config = ProductDescriptionConfig(
@@ -231,6 +231,7 @@ Here is a breakdown of all the configuration options available in `DanfeConfig`:
         display_additional_info=True,
         display_anp=True,
         display_anvisa=True,
+        display_xped=True,
     )
     ```
 - **Default**:
@@ -241,6 +242,7 @@ Here is a breakdown of all the configuration options available in `DanfeConfig`:
         display_anvisa=False,
         branch_info_prefix="",
         display_additional_info=True,
+        display_xped=False,
     )
     ```
 

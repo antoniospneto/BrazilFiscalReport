@@ -40,6 +40,14 @@ class DecimalConfig:
     quantity_precision: int = 4
 
 
+class DanfeLayout(Enum):
+    # AUTO picks the layout in force on the NF-e issue date (dhEmi): MOC 7.0
+    # before 2026-12-01, NT 2026.010 from then on.
+    AUTO = "auto"
+    MOC_7_0 = "moc_7_0"
+    NT_2026_010 = "nt_2026_010"
+
+
 class ReceiptPosition(Enum):
     TOP = "top"
     BOTTOM = "bottom"
@@ -82,3 +90,4 @@ class DanfeConfig:
         default_factory=ProductDescriptionConfig
     )
     footer_stamp: FooterStamp = field(default_factory=FooterStamp)
+    layout: DanfeLayout = DanfeLayout.AUTO

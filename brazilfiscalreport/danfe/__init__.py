@@ -1,5 +1,6 @@
 from .config import (
     DanfeConfig,
+    DanfeLayout,
     DecimalConfig,
     FontSize,
     FontType,
@@ -15,6 +16,7 @@ from .danfe import Danfe
 __all__ = [
     "Danfe",
     "DanfeConfig",
+    "DanfeLayout",
     "DecimalConfig",
     "FontType",
     "FontSize",

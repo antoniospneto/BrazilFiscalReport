@@ -46,4 +46,4 @@ Upload your fiscal XML and get the PDF instantly — no installation needed.
 - [FPDF2](https://github.com/py-pdf/fpdf2) - PDF creation library for Python
 - [phonenumbers](https://github.com/daviddrysdale/python-phonenumbers) - Phone number formatting
 - [python-barcode](https://github.com/WhyNotHugo/python-barcode) - Barcode generation
-- [qrcode](https://github.com/lincolnloop/python-qrcode) - QR code generation (required for DACTE, DAMDFE, DANFSe and DANFCe)
+- [qrcode](https://github.com/lincolnloop/python-qrcode) - QR code generation (DANFE, DACTE, DAMDFE, DANFSe and DANFCe)

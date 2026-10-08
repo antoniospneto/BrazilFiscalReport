@@ -2,6 +2,8 @@ DANFE (Auxiliary Document of the Electronic Invoice) is a printed representation
 
 ![Example of a DANFE generated from an NF-e XML](assets/screenshots/danfe.png){ width="480" }
 
+The layout follows the reference model of Technical Note **NT 2026.010 (DANFE Reforma Tributária)**, which adds the IBS, CBS and Selective Tax (IS) of the Brazilian consumption tax reform (RTC) to the DANFE. NF-e issued before December 1, 2026, when the NT goes into production, keep the previous layout (MOC 7.0); see [Layout transition](#layout-transition).
+
 [Try it online with a sample XML :material-arrow-right:](https://brazilfiscalreport.streamlit.app/?exemplo=danfe){ .md-button }
 
 ## Basic Usage
@@ -28,6 +30,33 @@ DANFE (Auxiliary Document of the Electronic Invoice) is a printed representation
     ```bash
     bfrep danfe /path/to/nfe.xml
     ```
+
+## Layout transition
+
+NT 2026.010 changes the DANFE layout on December 1, 2026, with no transition period. The `layout` option of `DanfeConfig` picks the layout:
+
+| Value | Layout |
+|---|---|
+| `DanfeLayout.AUTO` (default) | The one in force on the NF-e issue date (`dhEmi`, Brasília time): MOC 7.0 before December 1, 2026, NT 2026.010 from then on. |
+| `DanfeLayout.NT_2026_010` | NT 2026.010 for any NF-e. |
+| `DanfeLayout.MOC_7_0` | MOC 7.0 for any NF-e. Deprecated. |
+
+Since `AUTO` follows the issue date, the same XML always gives the same DANFE: a reprint of an NF-e issued in November keeps the previous layout.
+
+To try the new layout before the date:
+
+```python
+from brazilfiscalreport.danfe import Danfe, DanfeConfig, DanfeLayout
+
+config = DanfeConfig(layout=DanfeLayout.NT_2026_010)
+danfe = Danfe(xml_content, config=config)
+```
+
+!!! warning "Before December 1, 2026"
+    `DanfeLayout.NT_2026_010` is meant for testing and for NF-e issued in homologation (`tpAmb` = 2). Until December 1, 2026 the DANFE manual in force is the MOC 7.0 (Anexo II), which does not allow suppressing columns such as NCM and the ICMS base, value and rate (item 3.1.7); the new layout moves them. In production, keep `AUTO`.
+
+!!! note "Removal of the previous layout"
+    The MOC 7.0 layout is kept only for the transition and will be removed in a future version. From then on, every NF-e is printed in the NT 2026.010 layout. `DanfeLayout.MOC_7_0` emits a `DeprecationWarning`.
 
 ## Customizing DANFE 🎨
 
@@ -105,7 +134,7 @@ Here is a breakdown of all the configuration options available in `DanfeConfig`:
 - **Default**: `TOP` when portrait, `LEFT` when landscape orientation.
 
 !!! note
-    The page orientation is determined automatically by the `tpImp` tag of the NF-e XML (`1` = portrait, otherwise landscape) and is not configurable. In landscape orientation, the receipt position is forced to the far left; customization is not permitted.
+    The page orientation is determined automatically by the `tpImp` tag of the NF-e XML (`2` = landscape, any other value = portrait) and is not configurable. In landscape orientation, the receipt position is forced to the far left; customization is not permitted.
 
 ---
 
@@ -253,6 +282,19 @@ Here is a breakdown of all the configuration options available in `DanfeConfig`:
 
 ---
 
+**Layout**
+
+- **Type**: `DanfeLayout` (Enum)
+- **Values**: `AUTO`, `NT_2026_010`, `MOC_7_0`
+- **Description**: DANFE layout. `AUTO` picks the one in force on the NF-e issue date; see [Layout transition](#layout-transition).
+- **Example**:
+    ```python
+    config.layout = DanfeLayout.NT_2026_010
+    ```
+- **Default**: `AUTO`
+
+---
+
 ### Usage Example with Customization
 
 Here's how to set up a `DanfeConfig` object with a full set of customizations:
@@ -300,3 +342,13 @@ config = DanfeConfig(
 danfe = Danfe(xml_content, config=config)
 danfe.output('output_danfe.pdf')
 ```
+
+## NT 2026.010 layout notes
+
+- The header shows the **Código do Regime Tributário** (`CRT`) and reserves the **Tipo de Regime de Apuração do IBS e da CBS** field, which stays blank until a future NT defines its XML tag (NT 2026.010, item 4.2).
+- The totals are split in **Total dos Produtos e Total da Nota**, **Total do ICMS / IPI** and **Total do IBS / CBS / IS** (item 4.1). The FCP/DIFAL and single-phase ICMS lines are printed only when one of their values is not zero, and the single-phase IBS/CBS line only when the `gMono` group is informed (item 4.4).
+- The **Cálculo do ISSQN** block comes before the carrier block and is printed only when `ISSQNtot` is informed; the carrier address and volume lines are printed only when the NF-e has them.
+- Each item shows the CST/CFOP, the NCM and the `cClassTrib` at the bottom of the description, and the **bases, rates and values** of ICMS, IBS UF, IBS Município, CBS, IPI and IS (item 4.3). Only the taxes informed in the item are listed; rates and values are printed two per line (ICMS / CBS, IBS UF / IPI, IBS MUN / IS) when they fit, otherwise one per line.
+- When the `gRed` group is informed (rate reduction or government purchase), the effective rate `pAliqEfet` is printed for IBS UF, IBS Município and CBS instead of the regular rate.
+- Values absent from the XML are left blank instead of being printed as zero (item 4.4).
+- When the XML has `infNFeSupl/qrCode`, a **QR Code** box is printed beside **Dados Adicionais** (item 4.5). While the rules for the QR Code of the regular DANFE are not published, it follows NT 2026.003 (DANFE Simplificado Tipo 2): 22 mm of code inside a 25 x 25 mm box and error correction level M.

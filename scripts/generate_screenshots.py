@@ -42,9 +42,7 @@ def build_danfe():
     from brazilfiscalreport.danfe import Danfe, DanfeConfig
 
     config = DanfeConfig(logo=str(LOGO))
-    return Danfe(
-        xml=read_fixture("danfe/nfe_with_production_environment.xml"), config=config
-    )
+    return Danfe(xml=read_fixture("danfe/nfe_rtc.xml"), config=config)
 
 
 def build_dacce():

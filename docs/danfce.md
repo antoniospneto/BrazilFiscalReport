@@ -27,12 +27,6 @@ DANFCe (Auxiliary Document of the Electronic Consumer Invoice) is the receipt pr
     bfrep danfce /path/to/nfce.xml
     ```
 
-The QR Code requires the `qrcode` package, installed with the extra:
-
-```bash
-pip install 'brazilfiscalreport[danfce]'
-```
-
 ## Customizing DANFCe
 
 This section describes how to customize the PDF output of the DANFCe using the `DanfceConfig` class.

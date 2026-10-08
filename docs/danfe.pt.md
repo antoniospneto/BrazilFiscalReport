@@ -2,6 +2,8 @@ DANFE (Documento Auxiliar da Nota Fiscal Eletrônica) é uma representação imp
 
 ![Exemplo de DANFE gerado a partir do XML de NF-e](assets/screenshots/danfe.png){ width="480" }
 
+O leiaute segue o modelo de referência da Nota Técnica **NT 2026.010 (DANFE Reforma Tributária)**, que inclui no DANFE o IBS, a CBS e o Imposto Seletivo (IS) da Reforma Tributária do Consumo (RTC). NF-e emitidas antes de 1º de dezembro de 2026, quando a NT entra em produção, mantêm o leiaute anterior (MOC 7.0); veja [Transição de leiaute](#transicao-de-leiaute).
+
 [Teste online com um XML de exemplo :material-arrow-right:](https://brazilfiscalreport.streamlit.app/?exemplo=danfe){ .md-button }
 
 ## Uso Básico
@@ -28,6 +30,33 @@ DANFE (Documento Auxiliar da Nota Fiscal Eletrônica) é uma representação imp
     ```bash
     bfrep danfe /path/to/nfe.xml
     ```
+
+## Transição de leiaute
+
+A NT 2026.010 muda o leiaute do DANFE em 1º de dezembro de 2026, sem período de transição. A opção `layout` do `DanfeConfig` escolhe o leiaute:
+
+| Valor | Leiaute |
+|---|---|
+| `DanfeLayout.AUTO` (padrão) | O vigente na data de emissão da NF-e (`dhEmi`, horário de Brasília): MOC 7.0 antes de 1º de dezembro de 2026, NT 2026.010 a partir dessa data. |
+| `DanfeLayout.NT_2026_010` | NT 2026.010 para qualquer NF-e. |
+| `DanfeLayout.MOC_7_0` | MOC 7.0 para qualquer NF-e. Obsoleto. |
+
+Como o `AUTO` segue a data de emissão, o mesmo XML gera sempre o mesmo DANFE: a reimpressão de uma NF-e emitida em novembro mantém o leiaute anterior.
+
+Para testar o leiaute novo antes da data:
+
+```python
+from brazilfiscalreport.danfe import Danfe, DanfeConfig, DanfeLayout
+
+config = DanfeConfig(layout=DanfeLayout.NT_2026_010)
+danfe = Danfe(xml_content, config=config)
+```
+
+!!! warning "Antes de 1º de dezembro de 2026"
+    O `DanfeLayout.NT_2026_010` serve para testes e para NF-e emitidas em homologação (`tpAmb` = 2). Até 1º de dezembro de 2026 vale o Manual do DANFE do MOC 7.0 (Anexo II), que não permite suprimir colunas como NCM e base, valor e alíquota do ICMS (item 3.1.7); o leiaute novo as remaneja. Em produção, mantenha o `AUTO`.
+
+!!! note "Remoção do leiaute anterior"
+    O leiaute do MOC 7.0 existe só durante a transição e será removido em uma versão futura. A partir daí, toda NF-e sai no leiaute da NT 2026.010. O `DanfeLayout.MOC_7_0` emite um `DeprecationWarning`.
 
 ## Personalizando o DANFE 🎨
 
@@ -105,7 +134,7 @@ Aqui está uma descrição de todas as opções de configuração disponíveis e
 - **Padrão**: `TOP` quando retrato, `LEFT` quando orientação paisagem.
 
 !!! note
-    A orientação da página é determinada automaticamente pela tag `tpImp` do XML da NF-e (`1` = retrato, caso contrário paisagem) e não é configurável. Na orientação paisagem, a posição do recibo é forçada para o lado esquerdo; personalização não é permitida.
+    A orientação da página é determinada automaticamente pela tag `tpImp` do XML da NF-e (`2` = paisagem, qualquer outro valor = retrato) e não é configurável. Na orientação paisagem, a posição do recibo é forçada para o lado esquerdo; personalização não é permitida.
 
 ---
 
@@ -253,6 +282,19 @@ Aqui está uma descrição de todas as opções de configuração disponíveis e
 
 ---
 
+**Leiaute**
+
+- **Tipo**: `DanfeLayout` (Enum)
+- **Valores**: `AUTO`, `NT_2026_010`, `MOC_7_0`
+- **Descrição**: Leiaute do DANFE. O `AUTO` escolhe o vigente na data de emissão da NF-e; veja [Transição de leiaute](#transicao-de-leiaute).
+- **Exemplo**:
+    ```python
+    config.layout = DanfeLayout.NT_2026_010
+    ```
+- **Padrão**: `AUTO`
+
+---
+
 ### Exemplo de Uso com Personalização
 
 Veja como configurar um objeto `DanfeConfig` com um conjunto completo de personalizações:
@@ -300,3 +342,13 @@ config = DanfeConfig(
 danfe = Danfe(xml_content, config=config)
 danfe.output('output_danfe.pdf')
 ```
+
+## Notas sobre o leiaute da NT 2026.010
+
+- O cabeçalho exibe o **Código do Regime Tributário** (`CRT`) e reserva o campo **Tipo de Regime de Apuração do IBS e da CBS**, que fica em branco até uma NT futura definir a tag do XML (NT 2026.010, item 4.2).
+- Os totais são divididos em **Total dos Produtos e Total da Nota**, **Total do ICMS / IPI** e **Total do IBS / CBS / IS** (item 4.1). As linhas de FCP/DIFAL e de ICMS monofásico só são impressas quando algum dos seus valores é diferente de zero, e a linha de IBS/CBS monofásicos só quando o grupo `gMono` é informado (item 4.4).
+- O bloco **Cálculo do ISSQN** vem antes do bloco do transportador e só é impresso quando `ISSQNtot` é informado; as linhas de endereço do transportador e de volumes só são impressas quando a NF-e as possui.
+- Cada item exibe o CST/CFOP, o NCM e o `cClassTrib` no rodapé da descrição, e as **bases, alíquotas e valores** de ICMS, IBS UF, IBS Município, CBS, IPI e IS (item 4.3). Só os tributos informados no item são listados; alíquotas e valores são impressos dois por linha (ICMS / CBS, IBS UF / IPI, IBS MUN / IS) quando cabem, senão um por linha.
+- Quando o grupo `gRed` é informado (redução de alíquota ou compra governamental), é impressa a alíquota efetiva `pAliqEfet` do IBS UF, do IBS Município e da CBS no lugar da alíquota vigente.
+- Valores ausentes do XML ficam em branco em vez de impressos como zero (item 4.4).
+- Quando o XML possui `infNFeSupl/qrCode`, um quadro de **QR Code** é impresso ao lado de **Dados Adicionais** (item 4.5). Enquanto as regras do QR Code do DANFE comum não são publicadas, ele segue a NT 2026.003 (DANFE Simplificado Tipo 2): 22 mm de código num quadro de 25 x 25 mm e nível de correção de erros M.

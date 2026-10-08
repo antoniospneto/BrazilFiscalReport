@@ -61,12 +61,13 @@ def _resolve_logo(config_data):
     return logo_path
 
 
-def _build_margins(config_data, margins_cls):
+def _build_margins(config_data, margins_cls, defaults=None):
+    defaults = defaults or margins_cls
     return margins_cls(
-        top=config_data.get("TOP_MARGIN", margins_cls.top),
-        right=config_data.get("RIGHT_MARGIN", margins_cls.right),
-        bottom=config_data.get("BOTTOM_MARGIN", margins_cls.bottom),
-        left=config_data.get("LEFT_MARGIN", margins_cls.left),
+        top=config_data.get("TOP_MARGIN", defaults.top),
+        right=config_data.get("RIGHT_MARGIN", defaults.right),
+        bottom=config_data.get("BOTTOM_MARGIN", defaults.bottom),
+        left=config_data.get("LEFT_MARGIN", defaults.left),
     )
 
 
@@ -101,6 +102,13 @@ def _build_danfe(module, config_data, xml_content):
         logo=_resolve_logo(config_data),
     )
     return module.Danfe(xml=xml_content, config=config)
+
+
+def _build_danfe_etiqueta(module, config_data, xml_content):
+    config = module.DanfeEtiquetaConfig()
+    # The label has narrower default margins than the other documents.
+    config.margins = _build_margins(config_data, module.Margins, config.margins)
+    return module.DanfeEtiqueta(xml=xml_content, config=config)
 
 
 def _build_dacte(module, config_data, xml_content):
@@ -152,6 +160,14 @@ def generate_dacce(xml):
 @click.argument("xml", type=click.Path(exists=True))
 def generate_danfe(xml):
     _generate_document("danfe", "DANFE", xml, _build_danfe)
+
+
+@cli.command("danfe-etiqueta")
+@click.argument("xml", type=click.Path(exists=True))
+def generate_danfe_etiqueta(xml):
+    _generate_document(
+        "danfe", "DANFE Simplificado - Etiqueta", xml, _build_danfe_etiqueta
+    )
 
 
 @cli.command("dacte")

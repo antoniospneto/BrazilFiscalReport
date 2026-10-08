@@ -15,6 +15,7 @@ Python library for generating Brazilian auxiliary fiscal documents in PDF from X
 | Preview | Document | XML Source |
 |:---:|----------|:---:|
 | [![DANFE preview](assets/screenshots/danfe.png){ width="120" }](danfe.md) | [**DANFE**](danfe.md) — Documento Auxiliar da Nota Fiscal Eletrônica | NF-e |
+| [![DANFE Etiqueta preview](assets/screenshots/danfe-etiqueta.png){ width="120" }](danfe-etiqueta.md) | [**DANFE Simplificado – Etiqueta**](danfe-etiqueta.md) — DANFE reduzido para etiquetas de envio | NF-e |
 | [![DACTE preview](assets/screenshots/dacte.png){ width="120" }](dacte.md) | [**DACTE**](dacte.md) — Documento Auxiliar do Conhecimento de Transporte Eletrônico | CT-e |
 | [![DAMDFE preview](assets/screenshots/damdfe.png){ width="120" }](damdfe.md) | [**DAMDFE**](damdfe.md) — Documento Auxiliar do Manifesto Eletrônico de Documentos Fiscais | MDF-e |
 | [![DACCe preview](assets/screenshots/dacce.png){ width="120" }](dacce.md) | [**DACCe**](dacce.md) — Documento Auxiliar da Carta de Correção Eletrônica | CC-e |

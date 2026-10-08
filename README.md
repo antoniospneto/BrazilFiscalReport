@@ -111,7 +111,7 @@ pip install 'brazilfiscalreport[cli]'
 bfrep danfe nfe.xml        # writes nfe.pdf in the current folder
 ```
 
-`bfrep` ships one subcommand per document — `danfe`, `dacte`, `damdfe`, `danfse` and `danfce` (plus `dacce` for the NF-e correction letter) — each turning its XML into the matching PDF. Drop a `config.yaml` next to your files to set issuer data, logo and margins.
+`bfrep` ships one subcommand per document — `danfe`, `dacte`, `damdfe`, `danfse` and `danfce` (plus `dacce` for the NF-e correction letter and `danfe-etiqueta` for the DANFE Simplificado – Etiqueta) — each turning its XML into the matching PDF. Drop a `config.yaml` next to your files to set issuer data, logo and margins.
 
 See the [CLI documentation](https://engenere.github.io/BrazilFiscalReport/cli/) for all options.
 

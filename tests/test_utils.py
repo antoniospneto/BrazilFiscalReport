@@ -52,3 +52,4 @@ class TestUtils(unittest.TestCase):
         ]:
             with self.subTest(rate=rate):
                 self.assertEqual(expected, utils.format_rate(rate))
+        self.assertEqual("8,665", utils.format_rate("8.665", suffix=""))

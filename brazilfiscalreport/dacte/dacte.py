@@ -16,6 +16,7 @@ from ..utils import (
     format_cpf_cnpj,
     format_number,
     format_phone,
+    format_rate,
     format_xDime,
     get_date_utc,
     get_tag_text,
@@ -55,17 +56,6 @@ def _direct_text(node: Element, *path: str) -> str:
     return found.text.strip()
 
 
-def _format_rate(raw: str) -> str:
-    """Formata percentual: 2 casas, ou 4 quando o XML traz mais precisao."""
-    if not raw:
-        return ""
-    try:
-        precision = 4 if round(float(raw), 2) != round(float(raw), 4) else 2
-    except ValueError:
-        return ""
-    return format_number(raw, precision=precision)
-
-
 def _format_amount(raw: str) -> str:
     return format_number(raw, precision=2) if raw else ""
 
@@ -83,7 +73,11 @@ def read_ibs_cbs(ibscbs: Element) -> dict:
     def rate_and_value(group_tag, rate_tag, value_tag):
         group = g_ibscbs.find(f"./{NS}{group_tag}") if g_ibscbs is not None else None
         rate = _direct_text(group, "gRed", "pAliqEfet") or _direct_text(group, rate_tag)
-        return _format_rate(rate), _format_amount(_direct_text(group, value_tag))
+        # O "%" já vem no rótulo do bloco, ex.: "CBS (%/R$)".
+        return (
+            format_rate(rate, suffix=""),
+            _format_amount(_direct_text(group, value_tag)),
+        )
 
     p_ibs_uf, v_ibs_uf = rate_and_value("gIBSUF", "pIBSUF", "vIBSUF")
     p_ibs_mun, v_ibs_mun = rate_and_value("gIBSMun", "pIBSMun", "vIBSMun")

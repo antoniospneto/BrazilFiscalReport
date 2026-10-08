@@ -214,14 +214,17 @@ def test_dacte_rtc_aliquota_nominal_sem_gred(load_dacte):
 
 
 def test_dacte_rtc_aliquota_efetiva_com_gred(load_dacte):
-    """Com gRed, o % impresso é pAliqEfet (o que gerou o valor), não o nominal."""
+    """Com gRed, o % impresso é pAliqEfet (o que gerou o valor), não o nominal.
+
+    Transporte aéreo regional (cClassTrib 200050): redução de 40%.
+    """
     dacte = load_dacte("dacte_rtc_2027_gred.xml")
-    assert dacte.p_ibs_uf == "0,02"
-    assert dacte.v_ibs_uf == "2,40"
-    assert dacte.p_ibs_mun == "0,02"
-    assert dacte.v_ibs_mun == "2,40"
-    assert dacte.p_cbs == "3,52"
-    assert dacte.v_cbs == "422,40"
+    assert dacte.p_ibs_uf == "0,03"
+    assert dacte.v_ibs_uf == "3,60"
+    assert dacte.p_ibs_mun == "0,03"
+    assert dacte.v_ibs_mun == "3,60"
+    assert dacte.p_cbs == "5,28"
+    assert dacte.v_cbs == "633,60"
 
 
 @pytest.mark.parametrize(

@@ -15,14 +15,14 @@
                 <tpImp>1</tpImp>
                 <tpEmis>1</tpEmis>
                 <cDV>7</cDV>
-                <tpAmb>1</tpAmb>
+                <tpAmb>2</tpAmb>
                 <tpCTe>0</tpCTe>
                 <procEmi>0</procEmi>
                 <verProc>1.0</verProc>
                 <cMunEnv>3550308</cMunEnv>
                 <xMunEnv>SAO PAULO</xMunEnv>
                 <UFEnv>SP</UFEnv>
-                <modal>01</modal>
+                <modal>02</modal>
                 <tpServ>0</tpServ>
                 <cMunIni>3550308</cMunIni>
                 <xMunIni>SAO PAULO</xMunIni>
@@ -59,7 +59,7 @@
                 <CRT>3</CRT>
             </emit>
             <rem>
-                <CNPJ>45997418000153</CNPJ>
+                <CNPJ>11444777000161</CNPJ>
                 <IE>222333444555</IE>
                 <xNome>INDUSTRIA REMETENTE EXEMPLO S.A.</xNome>
                 <xFant>REMETENTE EXEMPLO</xFant>
@@ -77,7 +77,7 @@
                 </enderReme>
             </rem>
             <dest>
-                <CNPJ>33000167000101</CNPJ>
+                <CNPJ>12345678000195</CNPJ>
                 <IE>333444555666</IE>
                 <xNome>COMERCIAL DESTINATARIA EXEMPLO LTDA</xNome>
                 <fone>2132000000</fone>
@@ -94,9 +94,9 @@
                 </enderDest>
             </dest>
             <vPrest>
-                <vTPrest>12427.20</vTPrest>
+                <vTPrest>12640.80</vTPrest>
                 <vTPrestLiq>12000.00</vTPrestLiq>
-                <vRec>12427.20</vRec>
+                <vRec>12640.80</vRec>
                 <Comp>
                     <xNome>FRETE PESO</xNome>
                     <vComp>9000.00</vComp>
@@ -104,10 +104,6 @@
                 <Comp>
                     <xNome>FRETE VALOR</xNome>
                     <vComp>3000.00</vComp>
-                </Comp>
-                <Comp>
-                    <xNome>PEDAGIO</xNome>
-                    <vComp>427.20</vComp>
                 </Comp>
             </vPrest>
             <imp>
@@ -118,37 +114,38 @@
                 </ICMS>
                 <IBSCBS>
                     <CST>200</CST>
-                    <cClassTrib>200034</cClassTrib>
+                    <cClassTrib>200050</cClassTrib>
                     <gIBSCBS>
                         <vBC>12000.00</vBC>
                         <gIBSUF>
                             <pIBSUF>0.0500</pIBSUF>
                             <gRed>
-                                <pRedAliq>60.0000</pRedAliq>
-                                <pAliqEfet>0.0200</pAliqEfet>
+                                <pRedAliq>40.0000</pRedAliq>
+                                <pAliqEfet>0.0300</pAliqEfet>
                             </gRed>
-                            <vIBSUF>2.40</vIBSUF>
+                            <vIBSUF>3.60</vIBSUF>
                         </gIBSUF>
                         <gIBSMun>
                             <pIBSMun>0.0500</pIBSMun>
                             <gRed>
-                                <pRedAliq>60.0000</pRedAliq>
-                                <pAliqEfet>0.0200</pAliqEfet>
+                                <pRedAliq>40.0000</pRedAliq>
+                                <pAliqEfet>0.0300</pAliqEfet>
                             </gRed>
-                            <vIBSMun>2.40</vIBSMun>
+                            <vIBSMun>3.60</vIBSMun>
                         </gIBSMun>
-                        <vIBS>4.80</vIBS>
+                        <vIBS>7.20</vIBS>
                         <gCBS>
+                            <!-- pCBS de 2027 hipotetico: a aliquota ainda nao foi publicada (NT CT-e 2026.004). -->
                             <pCBS>8.8000</pCBS>
                             <gRed>
-                                <pRedAliq>60.0000</pRedAliq>
-                                <pAliqEfet>3.5200</pAliqEfet>
+                                <pRedAliq>40.0000</pRedAliq>
+                                <pAliqEfet>5.2800</pAliqEfet>
                             </gRed>
-                            <vCBS>422.40</vCBS>
+                            <vCBS>633.60</vCBS>
                         </gCBS>
                     </gIBSCBS>
                 </IBSCBS>
-                <vTotDFe>12427.20</vTotDFe>
+                <vTotDFe>12640.80</vTotDFe>
             </imp>
             <infCTeNorm>
                 <infCarga>
@@ -166,9 +163,18 @@
                     </infNFe>
                 </infDoc>
                 <infModal versaoModal="4.00">
-                    <rodo>
-                        <RNTRC>12345678</RNTRC>
-                    </rodo>
+                    <aereo>
+                        <nMinu>000001502</nMinu>
+                        <nOCA>12345678901</nOCA>
+                        <dPrevAereo>2027-03-16</dPrevAereo>
+                        <natCarga>
+                            <xDime>0120X0080X0100</xDime>
+                        </natCarga>
+                        <tarifa>
+                            <CL>G</CL>
+                            <vTar>10.00</vTar>
+                        </tarifa>
+                    </aereo>
                 </infModal>
             </infCTeNorm>
         </infCte>
@@ -195,7 +201,7 @@
     </CTe>
     <protCTe versao="4.00">
         <infProt>
-            <tpAmb>1</tpAmb>
+            <tpAmb>2</tpAmb>
             <verAplic>SVRS202610</verAplic>
             <chCTe>35270311222333000181570010000015021100000027</chCTe>
             <dhRecbto>2027-03-15T10:00:30-03:00</dhRecbto>

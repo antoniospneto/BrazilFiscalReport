@@ -77,8 +77,16 @@ def build_danfce():
     return Danfce(xml=read_fixture("danfce/danfce_default.xml"))
 
 
+def build_danfe_etiqueta():
+    from brazilfiscalreport.danfe import DanfeEtiqueta
+
+    xml = read_fixture("danfe/nfe_with_production_environment.xml")
+    return DanfeEtiqueta(xml=xml)
+
+
 BUILDERS = {
     "danfe": build_danfe,
+    "danfe-etiqueta": build_danfe_etiqueta,
     "dacce": build_dacce,
     "dacte": build_dacte,
     "damdfe": build_damdfe,

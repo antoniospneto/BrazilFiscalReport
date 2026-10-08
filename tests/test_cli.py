@@ -23,6 +23,14 @@ def test_generate_danfe(runner):
     assert result.exit_code == 0, result.output
 
 
+def test_generate_danfe_etiqueta(runner, tmp_path, monkeypatch):
+    xml_path = Path("tests/fixtures/danfe/nfe_test_1.xml").resolve()
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(cli, ["danfe-etiqueta", str(xml_path)])
+    assert result.exit_code == 0, result.output
+    assert (tmp_path / "nfe_test_1.pdf").exists()
+
+
 def test_generate_dacte(runner):
     xml_path = "tests/fixtures/dacte/dacte_test_1.xml"
     result = runner.invoke(cli, ["dacte", xml_path])

@@ -27,6 +27,12 @@ bfrep --version
 bfrep danfe /path/to/nfe.xml
 ```
 
+### [DANFE Simplificado – Etiqueta](danfe-etiqueta.md)
+
+```bash
+bfrep danfe-etiqueta /path/to/nfe.xml
+```
+
 ### [DACCe](dacce.md)
 
 ```bash
@@ -87,7 +93,7 @@ Each setting applies to a different set of commands:
 |---------|------------|
 | `ISSUER` | `dacce` only |
 | `LOGO` | `danfe`, `dacte`, `damdfe`, `danfce` |
-| `TOP/RIGHT/BOTTOM/LEFT_MARGIN` | `danfe`, `dacte`, `damdfe`, `danfse`, `danfce` |
+| `TOP/RIGHT/BOTTOM/LEFT_MARGIN` | `danfe`, `danfe-etiqueta`, `dacte`, `damdfe`, `danfse`, `danfce` |
 
 If no `config.yaml` is found, default values are used. If the `LOGO` path does not exist, it is ignored with a console warning and the document is generated without a logo.
 

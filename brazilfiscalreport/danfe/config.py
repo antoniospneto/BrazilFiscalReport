@@ -92,3 +92,24 @@ class DanfeConfig:
     )
     footer_stamp: FooterStamp = field(default_factory=FooterStamp)
     layout: DanfeLayout = DanfeLayout.AUTO
+
+
+@dataclass
+class DanfeEtiquetaConfig:
+    # Etiqueta térmica de 100 x 150 mm, o formato usual das etiquetas de envio.
+    # A norma só exige largura mínima de 55 mm (NT 2020.004).
+    paper_width: Number = 100
+    paper_height: Number = 150
+    margins: Margins = field(
+        default_factory=lambda: Margins(top=3, right=3, bottom=3, left=3)
+    )
+    font_type: FontType = FontType.TIMES
+    # Opcional desde a NT 2020.004 v1.10.
+    display_total: bool = True
+    # O endereço do destinatário, ou o do grupo entrega quando existir.
+    display_delivery_address: bool = True
+    display_items: bool = False
+    watermark_cancelled: bool = False
+    # Na contingência EPEC, o protocolo do evento (nº e data/hora), que vem no
+    # retorno do evento e não no XML da NF-e.
+    epec_protocol: str = ""

@@ -7,14 +7,6 @@ DANFSe (Documento Auxiliar da NFS-e) é um documento impresso usado no Brasil pa
 !!! note "Leiaute de XML suportado"
     O XML aceito é o da NFS-e no **Padrão Nacional** (Sistema Nacional NFS-e, namespace `http://www.sped.fazenda.gov.br/nfse`). Leiautes municipais ABRASF não são suportados.
 
-## Instalação
-
-O DANFSe requer a dependência opcional `qrcode`:
-
-```bash
-pip install 'brazilfiscalreport[danfse]'
-```
-
 ## Uso Básico
 
 === "Python"

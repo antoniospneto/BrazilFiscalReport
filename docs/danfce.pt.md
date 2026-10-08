@@ -27,12 +27,6 @@ O DANFCe (Documento Auxiliar da Nota Fiscal de Consumidor Eletrônica) é o cupo
     bfrep danfce /caminho/para/nfce.xml
     ```
 
-O QR Code depende do pacote `qrcode`, instalado pelo extra:
-
-```bash
-pip install 'brazilfiscalreport[danfce]'
-```
-
 ## Personalizando o DANFCe
 
 Esta seção descreve como personalizar a saída em PDF do DANFCe usando a classe `DanfceConfig`.

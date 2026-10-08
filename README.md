@@ -56,16 +56,13 @@ Every Brazilian electronic invoice is issued by the tax authority as an XML file
 pip install brazilfiscalreport
 ```
 
-This installs the core library with support for **DANFE** and **DACCe**. For additional document types and features:
+This installs every document type. For the `bfrep` command line tool:
 
 ```bash
-pip install 'brazilfiscalreport[dacte]'   # DACTE support (requires qrcode)
-pip install 'brazilfiscalreport[damdfe]'  # DAMDFE support (requires qrcode)
-pip install 'brazilfiscalreport[danfse]'  # DANFSe support (requires qrcode)
-pip install 'brazilfiscalreport[danfce]'  # DANFCe support (requires qrcode)
-pip install 'brazilfiscalreport[cli]'     # CLI tool
-pip install 'brazilfiscalreport[dacte,damdfe,danfse,danfce,cli]'  # All extras
+pip install 'brazilfiscalreport[cli]'
 ```
+
+The `dacte`, `damdfe`, `danfse` and `danfce` extras are no longer needed; they are kept so existing install commands keep working.
 
 ## Quick Start
 

@@ -8,47 +8,15 @@
 pip install brazilfiscalreport
 ```
 
-This installs the core library with support for **DANFE** and **DACCe**. Requires Python 3.10+.
+This installs every document type. Requires Python 3.10+.
 
-### Optional dependencies
+### Command line tool
 
-Some document types require additional packages:
+The `bfrep` command needs an extra:
 
-=== "DACTE"
-
-    ```bash
-    pip install 'brazilfiscalreport[dacte]'
-    ```
-
-=== "DAMDFE"
-
-    ```bash
-    pip install 'brazilfiscalreport[damdfe]'
-    ```
-
-=== "DANFSe"
-
-    ```bash
-    pip install 'brazilfiscalreport[danfse]'
-    ```
-
-=== "DANFCe"
-
-    ```bash
-    pip install 'brazilfiscalreport[danfce]'
-    ```
-
-=== "CLI"
-
-    ```bash
-    pip install 'brazilfiscalreport[cli]'
-    ```
-
-=== "All extras"
-
-    ```bash
-    pip install 'brazilfiscalreport[dacte,damdfe,danfse,danfce,cli]'
-    ```
+```bash
+pip install 'brazilfiscalreport[cli]'
+```
 
 ## Quick Start
 

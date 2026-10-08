@@ -86,6 +86,7 @@ Here is a breakdown of all the configuration options available in `DacteConfig`:
     config.display_ibs_cbs = True
     ```
 - **Default**: `False`
+- **Tax reform notes** (NT 2026.004 v1.00): the NT only changes the XML layout and does not change the DACTE printing, so the new fields (`vTPrestLiq`, `vTotDFe`) are not printed. The "VALOR TOTAL DO SERVIÇO" field is always `vTPrest`, which from 2027 already includes IBS and CBS. Values missing in the XML are left blank (never `0,00`). When the rate has a reduction (`gRed`), the printed percentage is the effective rate (`pAliqEfet`). The ICMS columns are read only from `imp/ICMS`, never from the `IBSCBS` group.
 
 ---
 
